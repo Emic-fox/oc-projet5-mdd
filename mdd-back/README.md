@@ -16,6 +16,7 @@ Ce dépôt contient le back-end de l'application, développé pour ORION dans le
 - **Mapping DTO/Entity** : MapStruct
 - **Réduction de boilerplate** : Lombok
 - **Tests** : JUnit 5 + Mockito
+- **Couverture de tests** : JaCoCo
 
 ## Prérequis
 
@@ -51,6 +52,41 @@ Une fois l'application démarrée, connecte ton client SQL avec :
 - **Port** : la valeur de `DB_HOST_PORT` dans ton `.env` (`3306` par défaut)
 - **Database** : la valeur de `DB_NAME`
 - **User / Password** : les valeurs de `DB_USER` / `DB_PASSWORD`
+
+## Tests
+
+Les tests unitaires s'appuient sur JUnit 5 et Mockito. Les tests d'intégration (taggés `integration`)
+démarrent un conteneur MariaDB via Testcontainers : **Docker doit être lancé** pour exécuter
+l'ensemble de la suite.
+
+- Lancer l'ensemble des tests (Docker requis) :
+
+  ```bash
+  ./mvnw test
+  ```
+
+- Lancer une seule classe de test :
+
+  ```bash
+  ./mvnw test -Dtest=AuthControllerTest
+  ```
+
+- Exclure les tests d'intégration (aucun Docker requis) :
+
+  ```bash
+  ./mvnw test -DexcludedGroups=integration
+  ```
+
+### Couverture de tests (JaCoCo)
+
+- Générer le rapport de couverture (exécute les tests puis produit le rapport ; Docker requis) :
+
+  ```bash
+  ./mvnw clean verify
+  ```
+
+- Consulter le rapport HTML : ouvrir `target/site/jacoco/index.html` dans un navigateur.
+- Formats machine disponibles pour la CI : `target/site/jacoco/jacoco.xml` et `jacoco.csv`.
 
 ## Gestion des conteneurs
 
