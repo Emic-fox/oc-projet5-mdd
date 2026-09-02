@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,18 +19,22 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("unit")
+@Tag("security")
+@DisplayName("JwtAuthenticationFilter")
 class JwtAuthenticationFilterTest {
 
     @Mock
     private JwtService jwtService;
     @Mock
-    private UserDetailsServiceImpl userDetailsService;
+    private UserDetailsService userDetailsService;
     @Mock
     private FilterChain chain;
 
@@ -49,6 +55,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("peuple le SecurityContext pour un token valide")
     void populatesSecurityContextForValidToken() throws Exception {
         UserDetailsImpl userDetails = new UserDetailsImpl(1L, "alice@mdd.com", "alice", "hashed");
         request.addHeader("Authorization", "Bearer good-token");
@@ -64,6 +71,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("laisse le contexte vide quand l'en-tête Authorization est absent")
     void leavesContextEmptyWhenNoHeader() throws Exception {
         filter.doFilter(request, response, chain);
 
@@ -73,6 +81,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("ignore un en-tête sans préfixe Bearer")
     void ignoresHeaderWithoutBearerPrefix() throws Exception {
         request.addHeader("Authorization", "Basic dXNlcjpwYXNz");
 
@@ -84,6 +93,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("vide le contexte quand le token est invalide")
     void clearsContextWhenTokenIsInvalid() throws Exception {
         request.addHeader("Authorization", "Bearer bad-token");
         when(jwtService.extractSubject("bad-token")).thenThrow(new JwtException("invalid"));
@@ -95,6 +105,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("vide le contexte quand l'utilisateur n'existe plus")
     void clearsContextWhenUserNoLongerExists() throws Exception {
         request.addHeader("Authorization", "Bearer good-token");
         when(jwtService.extractSubject("good-token")).thenReturn("ghost");
@@ -108,6 +119,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("n'écrase pas une authentification déjà présente")
     void doesNotOverrideExistingAuthentication() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("existing", null));

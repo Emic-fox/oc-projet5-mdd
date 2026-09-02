@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * Câblage de la sécurité applicative : API stateless authentifiée par JWT.
  */
 @Configuration
-class SecurityConfig {
+public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/register", "/api/auth/login",

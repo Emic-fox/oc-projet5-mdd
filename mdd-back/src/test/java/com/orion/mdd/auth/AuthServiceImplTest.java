@@ -7,7 +7,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +31,9 @@ import com.orion.mdd.users.User;
 import com.orion.mdd.users.UserService;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("unit")
+@Tag("service")
+@DisplayName("AuthServiceImpl")
 class AuthServiceImplTest {
 
     @Mock
@@ -50,9 +55,11 @@ class AuthServiceImplTest {
     }
 
     @Nested
+    @DisplayName("register")
     class Register {
 
         @Test
+        @DisplayName("crée l'utilisateur avec un mot de passe encodé et renvoie un token")
         void createsUserWithEncodedPasswordAndReturnsToken() {
             when(userService.existsByEmail("alice@mdd.com")).thenReturn(false);
             when(userService.existsByUsername("alice")).thenReturn(false);
@@ -72,6 +79,7 @@ class AuthServiceImplTest {
         }
 
         @Test
+        @DisplayName("lève EmailAlreadyUsedException et ne crée rien quand l'email existe")
         void throwsWhenEmailAlreadyUsed() {
             when(userService.existsByEmail("alice@mdd.com")).thenReturn(true);
 
@@ -82,6 +90,7 @@ class AuthServiceImplTest {
         }
 
         @Test
+        @DisplayName("lève UsernameAlreadyUsedException et ne crée rien quand le username existe")
         void throwsWhenUsernameAlreadyUsed() {
             when(userService.existsByEmail("alice@mdd.com")).thenReturn(false);
             when(userService.existsByUsername("alice")).thenReturn(true);
@@ -94,9 +103,11 @@ class AuthServiceImplTest {
     }
 
     @Nested
+    @DisplayName("login")
     class Login {
 
         @Test
+        @DisplayName("renvoie un token pour le principal authentifié")
         void returnsTokenForAuthenticatedPrincipal() {
             UserDetailsImpl principal = UserDetailsImpl.fromUser(alice());
             Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null);
@@ -107,6 +118,7 @@ class AuthServiceImplTest {
         }
 
         @Test
+        @DisplayName("transmet les identifiants fournis à l'AuthenticationManager")
         void passesGivenCredentialsToAuthenticationManager() {
             UserDetailsImpl principal = UserDetailsImpl.fromUser(alice());
             when(authenticationManager.authenticate(any()))
@@ -123,6 +135,7 @@ class AuthServiceImplTest {
         }
 
         @Test
+        @DisplayName("traduit l'échec d'authentification en InvalidCredentialsException")
         void throwsInvalidCredentialsWhenAuthenticationFails() {
             when(authenticationManager.authenticate(any()))
                     .thenThrow(new BadCredentialsException("bad"));
@@ -133,9 +146,11 @@ class AuthServiceImplTest {
     }
 
     @Nested
+    @DisplayName("me")
     class Me {
 
         @Test
+        @DisplayName("délègue le chargement à UserService")
         void delegatesToUserService() {
             User alice = alice();
             when(userService.loadById(1L)).thenReturn(alice);

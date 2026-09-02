@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +19,9 @@ import com.orion.mdd.users.UserNotFoundException;
 import com.orion.mdd.users.UserService;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("unit")
+@Tag("security")
+@DisplayName("UserDetailsServiceImpl")
 class UserDetailsServiceImplTest {
 
     @Mock
@@ -26,6 +31,7 @@ class UserDetailsServiceImplTest {
     private UserDetailsServiceImpl service;
 
     @Test
+    @DisplayName("loadUserByUsername mappe l'utilisateur du domaine vers UserDetailsImpl")
     void loadUserByUsername_mapsDomainUserToUserDetails() {
         User alice = new User("alice@mdd.com", "alice", "hashed");
         alice.setId(7L);
@@ -40,6 +46,7 @@ class UserDetailsServiceImplTest {
     }
 
     @Test
+    @DisplayName("loadUserByUsername traduit UserNotFoundException en UsernameNotFoundException")
     void loadUserByUsername_translatesUserNotFound() {
         when(userService.loadUserByEmailOrUsername("ghost"))
                 .thenThrow(new UserNotFoundException());

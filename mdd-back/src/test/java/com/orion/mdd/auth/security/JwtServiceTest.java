@@ -5,11 +5,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Base64;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 
+@Tag("unit")
+@Tag("security")
+@DisplayName("JwtService")
 class JwtServiceTest {
 
     private static final String SECRET = Base64.getEncoder()
@@ -22,6 +27,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("generateToken puis extractSubject : le username fait l'aller-retour")
     void generateThenExtract_roundTripsTheUsername() {
         JwtService service = jwtService(SECRET, 60_000);
 
@@ -31,6 +37,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("extractSubject lève une JwtException sur un token malformé")
     void extractSubject_throwsOnMalformedToken() {
         JwtService service = jwtService(SECRET, 60_000);
 
@@ -39,6 +46,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("extractSubject rejette un token signé avec une autre clé")
     void extractSubject_throwsWhenSignedWithAnotherKey() {
         String foreignToken = jwtService(OTHER_SECRET, 60_000).generateToken("alice");
 
@@ -47,6 +55,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("extractSubject lève ExpiredJwtException quand le token est expiré")
     void extractSubject_throwsWhenTokenIsExpired() {
         JwtService service = jwtService(SECRET, -1_000);
         String expired = service.generateToken("alice");
