@@ -138,9 +138,9 @@ class AuthServiceImplTest {
         @Test
         void delegatesToUserService() {
             User alice = alice();
-            when(userService.loadUserByEmailOrUsername("alice")).thenReturn(alice);
+            when(userService.loadById(1L)).thenReturn(alice);
 
-            assertThat(service.me("alice")).isSameAs(alice);
+            assertThat(service.me(1L)).isSameAs(alice);
         }
     }
 }

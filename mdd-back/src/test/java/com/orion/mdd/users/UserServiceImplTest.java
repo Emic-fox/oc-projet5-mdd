@@ -51,4 +51,20 @@ class UserServiceImplTest {
 
         verify(userRepository).findByEmailOrUsername("alice");
     }
+
+    @Test
+    void loadById_returnsUserWhenFound() {
+        User alice = alice();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(alice));
+
+        assertThat(service.loadById(1L)).isSameAs(alice);
+    }
+
+    @Test
+    void loadById_throwsWhenNotFound() {
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.loadById(99L))
+                .isInstanceOf(UserNotFoundException.class);
+    }
 }

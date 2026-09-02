@@ -1,12 +1,17 @@
 package com.orion.mdd.core.exceptions;
 
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -50,5 +55,25 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail body = super.createProblemDetail(ex, status, message, null, null, request);
 
         return super.handleExceptionInternal(ex, body, new HttpHeaders(), status, request);
+    }
+
+    /**
+     * Enrichit la réponse de validation ({@code @Valid} sur un corps de requête) avec la liste
+     * des champs en erreur et le message de chaque contrainte violée.
+     */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> Map.of(
+                        "field", error.getField(),
+                        "message", error.getDefaultMessage() != null ? error.getDefaultMessage() : "invalid"))
+                .toList();
+
+        ProblemDetail body = ex.getBody();
+        body.setProperty("errors", errors);
+
+        return super.handleExceptionInternal(ex, body, headers, status, request);
     }
 }

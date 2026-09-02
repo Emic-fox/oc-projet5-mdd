@@ -10,6 +10,6 @@ public interface AuthService {
     /** Vérifie les identifiants et renvoie un jeton d'authentification. */
     String login(String emailOrUsername, String rawPassword);
 
-    /** Renvoie l'utilisateur identifié par son email ou son username. */
-    User me(String emailOrUsername);
+    /** Renvoie l'utilisateur authentifié à partir de son identifiant. */
+    User me(Long userId);
 }

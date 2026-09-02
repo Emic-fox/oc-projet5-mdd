@@ -11,9 +11,9 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import com.orion.mdd.users.validation.Username;
+
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,10 +38,7 @@ public class User {
     private String email;
 
     @NonNull
-    @Size(min = 3, max = 50)
-    // Ne jamais autoriser "@" dans le username, pour éviter tout doublon possible avec l'email
-    @Pattern(regexp = "^[a-zA-Z0-9._-]+$",
-            message = "must contain only letters, digits, dots, underscores or hyphens")
+    @Username
     @Column(nullable = false, unique = true)
     private String username;
 

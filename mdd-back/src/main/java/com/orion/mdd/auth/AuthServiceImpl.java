@@ -62,8 +62,8 @@ class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(readOnly = true)
-    public User me(String emailOrUsername) {
-        return userService.loadUserByEmailOrUsername(emailOrUsername);
+    public User me(Long userId) {
+        return userService.loadById(userId);
     }
 
 }

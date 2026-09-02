@@ -17,6 +17,12 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User loadById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
