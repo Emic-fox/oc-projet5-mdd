@@ -11,8 +11,8 @@ import { Button } from "@shared/components/button/button";
   <main class="flex flex-col items-center gap-10">
     <app-logo size="large" />
     <div class="px-8 flex w-full flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-0">
-      <app-button variant="secondary" (click)="goTo('login')">Se connecter</app-button>
-      <app-button variant="secondary" (click)="goTo('register')">S'inscrire</app-button>
+      <app-button variant="secondary" class="w-full md:w-auto" (click)="goTo('login')">Se connecter</app-button>
+      <app-button variant="secondary" class="w-full md:w-auto" (click)="goTo('register')">S'inscrire</app-button>
     </div>
   </main>
   `,

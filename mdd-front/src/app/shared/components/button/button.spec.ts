@@ -40,9 +40,17 @@ describe('Button', () => {
       fixture.detectChanges();
       const classes = getButton().className;
 
-      expect(classes).toContain('w-full');
+      expect(classes).not.toContain('w-full');
       expect(classes).toContain('bg-primary');
       expect(classes).toContain('text-white');
+    });
+
+    it('should apply extra classes passed by the caller', () => {
+      fixture.componentRef.setInput('class', 'w-full');
+      fixture.detectChanges();
+      const classes = getButton().className;
+
+      expect(classes).toContain('w-full');
     });
 
     it('should apply secondary variant classes', () => {

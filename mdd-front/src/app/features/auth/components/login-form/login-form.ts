@@ -1,0 +1,44 @@
+import { Component, signal } from '@angular/core';
+import { form, FormField, required, email, submit } from '@angular/forms/signals';
+import { Button } from "@shared/components/button/button";
+import { InputText } from "@shared/components/forms/input-text/input-text";
+import { InputPassword } from "@shared/components/forms/input-password/input-password";
+
+interface LoginData {
+  login: string;
+  password: string;
+}
+
+@Component({
+  imports: [Button, FormField, InputText, InputPassword],
+  selector: 'app-login-form',
+  styles: ``,
+  template: `
+  <form class="flex flex-col items-center gap-4 w-full max-w-sm" (submit)="onSubmit($event)">
+    <app-input-text [formField]="loginForm.login" placeholder="JohnDoe" autocomplete="username">Email ou nom d'utilisateur</app-input-text>
+
+    <app-input-password [formField]="loginForm.password" autocomplete="current-password" />
+
+    <app-button type="submit" [disabled]="loginForm().invalid()">Se connecter</app-button>
+  </form>`,
+})
+export class LoginForm {
+  loginModel = signal<LoginData>({
+    login: '',
+    password: ''
+  });
+
+  loginForm = form(this.loginModel, (fieldPath) => {
+    required(fieldPath.login, { message: "L'identifiant est obligatoire" });
+    required(fieldPath.password, { message: "Le mot de passe est obligatoire" });
+  });
+
+  onSubmit(event: Event) {
+    event.preventDefault();
+    submit(this.loginForm, async () => {
+      const credentials = this.loginModel();
+      // TODO
+      console.debug('Logging in with:', credentials);
+    });
+  }
+}
