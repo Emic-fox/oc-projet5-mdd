@@ -9,12 +9,12 @@ import { ValidationError, WithOptionalFieldTree } from '@angular/forms/signals';
   template: `
   <div class="flex flex-col gap-1">
     <label class="flex flex-col gap-0.5">
-      <ng-content select="[label]"></ng-content>
+      <ng-content select="[label]" data-testid="label"></ng-content>
       <ng-content></ng-content>
     </label>
 
     @if (invalid() && touched()) {
-      <ul class="text-sm text-red-600" role="alert">
+      <ul class="text-sm text-red-600" role="alert" data-testid="error-messages">
         @for (error of errors(); track error.message) {
           <li class="error">{{ error.message }}</li>
         }

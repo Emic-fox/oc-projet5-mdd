@@ -16,13 +16,13 @@ export interface RegisterData {
   styles: ``,
   template: `
   <form class="flex flex-col items-center gap-4 w-full max-w-sm" (submit)="onSubmit($event)">
-    <app-input-text [formField]="registerForm.username" placeholder="john.doe" autocomplete="username">Nom d'utilisateur</app-input-text>
+    <app-input-text [formField]="registerForm.username" placeholder="john.doe" autocomplete="username" data-testid="username">Nom d'utilisateur</app-input-text>
 
-    <app-input-text [formField]="registerForm.email" type="email" placeholder="john.doe@example.com" autocomplete="email">Adresse e-mail</app-input-text>
+    <app-input-text [formField]="registerForm.email" type="email" placeholder="john.doe@example.com" autocomplete="email" data-testid="email">Adresse e-mail</app-input-text>
 
-    <app-input-password [formField]="registerForm.password" autocomplete="new-password" />
+    <app-input-password [formField]="registerForm.password" autocomplete="new-password" data-testid="password" />
 
-    <app-button type="submit" [disabled]="registerForm().invalid()">S'inscrire</app-button>
+    <app-button type="submit" data-testid="register-submit" [disabled]="registerForm().invalid()">S'inscrire</app-button>
   </form>`,
 })
 export class RegisterForm {

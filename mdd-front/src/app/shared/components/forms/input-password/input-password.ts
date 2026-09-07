@@ -16,6 +16,7 @@ import { FormFieldLayout } from '@shared/components/forms/form-field-layout/form
       (blur)="touch.emit()"
       [placeholder]="placeholder()"
       [autocomplete]="autocomplete()"
+      data-testid="input"
     />
   </app-form-field-layout>
   `,

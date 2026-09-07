@@ -13,12 +13,12 @@ import { AuthService } from '@features/auth/services/auth.service';
     <app-logo size="large" />
 
     @if (auth.user(); as user) {
-      <p class="text-xl font-semibold">Bienvenue {{ user.username }}</p>
-      <app-button variant="secondary" class="w-full md:w-auto" (click)="logout()">Se déconnecter</app-button>
+      <p class="text-xl font-semibold" data-testid="welcome">Bienvenue {{ user.username }}</p>
+      <app-button variant="secondary" class="w-full md:w-auto" data-testid="logout" (click)="logout()">Se déconnecter</app-button>
     } @else {
       <div class="px-8 flex w-full flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-0">
-        <app-button variant="secondary" class="w-full md:w-auto" (click)="goTo('login')">Se connecter</app-button>
-        <app-button variant="secondary" class="w-full md:w-auto" (click)="goTo('register')">S'inscrire</app-button>
+        <app-button variant="secondary" class="w-full md:w-auto" data-testid="nav-login" (click)="goTo('login')">Se connecter</app-button>
+        <app-button variant="secondary" class="w-full md:w-auto" data-testid="nav-register" (click)="goTo('register')">S'inscrire</app-button>
       </div>
     }
   </main>

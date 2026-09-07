@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   selector: 'app-back-link',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <button type="button" class="cursor-pointer" [attr.aria-label]="label()" (click)="goBack()">
+    <button type="button" class="cursor-pointer" data-testid="back-link" [attr.aria-label]="label()" (click)="goBack()">
       <img src="assets/icons/arrow-left.svg" [alt]="label()" class="h-6 w-auto" />
     </button>
   `,

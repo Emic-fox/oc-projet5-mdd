@@ -15,11 +15,11 @@ export interface LoginData {
   styles: ``,
   template: `
   <form class="flex flex-col items-center gap-4 w-full max-w-sm" (submit)="onSubmit($event)">
-    <app-input-text [formField]="loginForm.login" placeholder="JohnDoe" autocomplete="username">Email ou nom d'utilisateur</app-input-text>
+    <app-input-text [formField]="loginForm.login" placeholder="JohnDoe" autocomplete="username" data-testid="login">Email ou nom d'utilisateur</app-input-text>
 
-    <app-input-password [formField]="loginForm.password" autocomplete="current-password" />
+    <app-input-password [formField]="loginForm.password" autocomplete="current-password" data-testid="password" />
 
-    <app-button type="submit" [disabled]="loginForm().invalid()">Se connecter</app-button>
+    <app-button type="submit" data-testid="login-submit" [disabled]="loginForm().invalid()">Se connecter</app-button>
   </form>`,
 })
 export class LoginForm {
