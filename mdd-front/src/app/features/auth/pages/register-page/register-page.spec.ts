@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RegisterPage } from './register-page';
 import { AuthService } from '../../services/auth.service';
+import { ApiError } from '@app/core/errors/api-error';
 
 describe('RegisterPage', () => {
   let component: RegisterPage;
@@ -45,7 +46,9 @@ describe('RegisterPage', () => {
   });
 
   const failWith = (init: { status: number; error?: unknown }) =>
-    register.mockReturnValue(throwError(() => new HttpErrorResponse(init)));
+    register.mockReturnValue(
+      throwError(() => ApiError.from(new HttpErrorResponse(init))),
+    );
 
   it('should surface the API detail message', () => {
     failWith({ status: 409, error: { status: 409, detail: 'Email already used' } });

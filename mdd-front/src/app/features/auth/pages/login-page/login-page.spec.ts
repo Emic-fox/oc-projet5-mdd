@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { LoginPage } from './login-page';
 import { AuthService } from '../../services/auth.service';
+import { ApiError } from '@app/core/errors/api-error';
 
 describe('LoginPage', () => {
   let component: LoginPage;
@@ -39,7 +40,9 @@ describe('LoginPage', () => {
   });
 
   const failWith = (init: { status: number; error?: unknown }) =>
-    login.mockReturnValue(throwError(() => new HttpErrorResponse(init)));
+    login.mockReturnValue(
+      throwError(() => ApiError.from(new HttpErrorResponse(init))),
+    );
 
   it('should display a credentials error on 401', () => {
     failWith({ status: 401 });

@@ -1,10 +1,9 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { RegisterForm, RegisterData } from "../../components/register-form/register-form";
 import { AuthService } from '../../services/auth.service';
-import { ProblemDetail } from '@app/core/models/problem-detail.interface';
+import { ApiError } from '@app/core/errors/api-error';
 
 @Component({
   imports: [RegisterForm],
@@ -30,15 +29,7 @@ export class RegisterPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.router.navigate(['/']),
-        error: (err: HttpErrorResponse) => this.error.set(this.errorMessage(err)),
+        error: (err: ApiError) => this.error.set(err.message),
       });
-  }
-
-  private errorMessage(err: HttpErrorResponse): string {
-    if (err.status === 0) {
-      return 'Impossible de contacter le serveur. Veuillez réessayer plus tard.';
-    }
-    const problem = err.error as ProblemDetail | null;
-    return problem?.detail || 'Une erreur est survenue. Veuillez réessayer.';
   }
 }
