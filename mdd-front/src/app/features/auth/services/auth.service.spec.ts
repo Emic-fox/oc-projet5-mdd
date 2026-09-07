@@ -28,6 +28,7 @@ describe('AuthService', () => {
   };
 
   beforeEach(() => {
+    localStorage.clear();
     build();
   });
 

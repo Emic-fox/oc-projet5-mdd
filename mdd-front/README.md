@@ -55,6 +55,16 @@ Les artefacts sont générés dans `dist/`.
 npm test
 ```
 
+#### Couverture de code
+
+```bash
+npm run test:coverage
+```
+
+Le résumé s'affiche dans la console et un rapport détaillé est généré dans
+`coverage/mdd-front/` (`index.html` navigable, `clover.xml`,
+`coverage-final.json`). Le dossier `coverage/` est ignoré par Git.
+
 ### Tests end-to-end (Cypress)
 
 Le front (`npm start`) et le back doivent être démarrés au préalable.
