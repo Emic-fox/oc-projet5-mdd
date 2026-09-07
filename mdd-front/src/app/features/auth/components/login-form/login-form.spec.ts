@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { LoginForm } from './login-form';
+import { LoginForm, LoginData } from './login-form';
 
 describe('LoginForm', () => {
   let component: LoginForm;
@@ -73,15 +73,21 @@ describe('LoginForm', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
-  it('should submit the current credentials', async () => {
-    const debug = vi.spyOn(console, 'debug').mockImplementation(() => {}); // TODO remplacer par le service
+  it('should emit the current credentials on submit', async () => {
+    const emitted: LoginData[] = [];
+    component.submitted.subscribe((value) => emitted.push(value));
     await setModel('JohnDoe', 'secret');
     component.onSubmit(new Event('submit'));
     await fixture.whenStable();
-    expect(debug).toHaveBeenCalledWith('Logging in with:', {
-      login: 'JohnDoe',
-      password: 'secret',
-    });
-    debug.mockRestore();
+    expect(emitted).toEqual([{ login: 'JohnDoe', password: 'secret' }]);
+  });
+
+  it('should not emit when the form is invalid', async () => {
+    const emitted: LoginData[] = [];
+    component.submitted.subscribe((value) => emitted.push(value));
+    await setModel('', '');
+    component.onSubmit(new Event('submit'));
+    await fixture.whenStable();
+    expect(emitted).toEqual([]);
   });
 });

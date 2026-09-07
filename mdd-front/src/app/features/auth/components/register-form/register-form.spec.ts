@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RegisterForm } from './register-form';
+import { RegisterForm, RegisterData } from './register-form';
 
 describe('RegisterForm', () => {
   let component: RegisterForm;
@@ -124,16 +124,23 @@ describe('RegisterForm', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
-  it('should submit the current credentials', async () => {
-    const debug = vi.spyOn(console, 'debug').mockImplementation(() => {}); // TODO remplacer par le service
+  it('should emit the current credentials on submit', async () => {
+    const emitted: RegisterData[] = [];
+    component.submitted.subscribe((value) => emitted.push(value));
     await setModel('john', 'john.doe@example.com', validPassword);
     component.onSubmit(new Event('submit'));
     await fixture.whenStable();
-    expect(debug).toHaveBeenCalledWith('Registering with:', {
-      username: 'john',
-      email: 'john.doe@example.com',
-      password: validPassword,
-    });
-    debug.mockRestore();
+    expect(emitted).toEqual([
+      { username: 'john', email: 'john.doe@example.com', password: validPassword },
+    ]);
+  });
+
+  it('should not emit when the form is invalid', async () => {
+    const emitted: RegisterData[] = [];
+    component.submitted.subscribe((value) => emitted.push(value));
+    await setModel('', '', '');
+    component.onSubmit(new Event('submit'));
+    await fixture.whenStable();
+    expect(emitted).toEqual([]);
   });
 });

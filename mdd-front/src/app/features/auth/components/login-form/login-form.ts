@@ -1,10 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { Button } from "@shared/components/button/button";
 import { InputText } from "@shared/components/forms/input-text/input-text";
 import { InputPassword } from "@shared/components/forms/input-password/input-password";
 
-interface LoginData {
+export interface LoginData {
   login: string;
   password: string;
 }
@@ -23,6 +23,8 @@ interface LoginData {
   </form>`,
 })
 export class LoginForm {
+  submitted = output<LoginData>();
+
   loginModel = signal<LoginData>({
     login: '',
     password: ''
@@ -36,9 +38,7 @@ export class LoginForm {
   onSubmit(event: Event) {
     event.preventDefault();
     submit(this.loginForm, async () => {
-      const credentials = this.loginModel();
-      // TODO
-      console.debug('Logging in with:', credentials);
+      this.submitted.emit(this.loginModel());
     });
   }
 }

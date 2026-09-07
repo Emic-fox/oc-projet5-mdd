@@ -1,10 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { form, FormField, required, email, minLength, pattern, submit } from '@angular/forms/signals';
 import { Button } from "@shared/components/button/button";
 import { InputText } from "@shared/components/forms/input-text/input-text";
 import { InputPassword } from "@shared/components/forms/input-password/input-password";
 
-interface RegisterData {
+export interface RegisterData {
   username: string;
   email: string;
   password: string;
@@ -26,6 +26,8 @@ interface RegisterData {
   </form>`,
 })
 export class RegisterForm {
+  submitted = output<RegisterData>();
+
   registerModel = signal<RegisterData>({
     username: '',
     email: '',
@@ -49,9 +51,7 @@ export class RegisterForm {
   onSubmit(event: Event) {
     event.preventDefault();
     submit(this.registerForm, async () => {
-      const credentials = this.registerModel();
-      // TODO
-      console.debug('Registering with:', credentials);
+      this.submitted.emit(this.registerModel());
     });
   }
 }
