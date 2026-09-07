@@ -1,59 +1,67 @@
-# MddFront
+# MDD — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+MDD (Monde de Dév) est un réseau social destiné aux développeurs. Il permet à ses utilisateurs de créer un compte, se connecter, s'abonner à des thèmes de programmation pour suivre les articles associés dans leur fil d'actualité, ainsi que de rédiger des articles et des commentaires visibles par les autres membres.
 
-## Development server
+Ce dépôt contient le front-end de l'application, développé pour ORION dans le cadre de la validation d'un MVP interne.
 
-To start a local development server, run:
+## Stack technique
 
-```bash
-ng serve
-```
+- **Framework** : Angular 22 (standalone components, généré via Angular CLI)
+- **Langage** : TypeScript
+- **Styles** : Tailwind CSS 4
+- **Tests unitaires** : Vitest (via `@angular/build`) + jsdom
+- **Tests end-to-end** : Cypress 16
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Prérequis
 
-## Code scaffolding
+- Node.js (version compatible Angular 22, Node 20+)
+- npm
+- Le back-end (`mdd-back`) démarré et accessible sur `http://localhost:8080`
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Installation
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
+## Configuration
 
-To build the project run:
+L'URL de l'API est définie dans `src/environments/` :
+
+- `environment.development.ts` — utilisé par `npm start` : `http://localhost:8080`
+- `environment.ts` — utilisé par le build de production : URL relative (même origine)
+
+## Démarrage
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+L'application est servie sur `http://localhost:4200/` et se recharge automatiquement à chaque modification des sources.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Les artefacts sont générés dans `dist/`.
 
-For end-to-end (e2e) testing, run:
+## Tests
+
+### Tests unitaires (Vitest)
 
 ```bash
-ng e2e
+npm test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Tests end-to-end (Cypress)
 
-## Additional Resources
+Le front (`npm start`) et le back doivent être démarrés au préalable.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+npm run cypress:open   # mode interactif
+npm run cypress:run    # mode headless
+```
+
+Les scénarios se trouvent dans `cypress/e2e/`.
