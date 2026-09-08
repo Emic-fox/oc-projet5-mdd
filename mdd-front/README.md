@@ -10,7 +10,7 @@ Ce dépôt contient le front-end de l'application, développé pour ORION dans l
 - **Langage** : TypeScript
 - **Styles** : Tailwind CSS 4
 - **Tests unitaires** : Vitest (via `@angular/build`) + jsdom
-- **Tests end-to-end** : Cypress 16
+- **Tests end-to-end** : Playwright
 
 ## Prérequis
 
@@ -65,13 +65,6 @@ Le résumé s'affiche dans la console et un rapport détaillé est généré dan
 `coverage/mdd-front/` (`index.html` navigable, `clover.xml`,
 `coverage-final.json`). Le dossier `coverage/` est ignoré par Git.
 
-### Tests end-to-end (Cypress)
+### Tests end-to-end (Playwright)
 
-Le front (`npm start`) et le back doivent être démarrés au préalable.
-
-```bash
-npm run cypress:open   # mode interactif
-npm run cypress:run    # mode headless
-```
-
-Les scénarios se trouvent dans `cypress/e2e/`.
+TODO
