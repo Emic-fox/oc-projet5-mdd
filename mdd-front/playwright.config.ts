@@ -1,4 +1,32 @@
 import { defineConfig, devices } from '@playwright/test';
+import type { CoverageReportOptions } from 'monocart-reporter';
+
+/**
+ * Couverture de code collectée pendant les tests E2E (voir
+ * `e2e/fixtures/coverage.fixtures.ts`). Rapports générés dans `coverage/e2e`.
+ */
+const coverage: CoverageReportOptions = {
+  outputDir: './coverage/e2e',
+  reports: [
+    ['v8', { outputFile: 'index.html', metrics: ['lines'] }],
+    ['console-summary', { metrics: ['lines'] }],
+    ['html-spa', { subdir: 'html-spa' }],
+    ['lcovonly', { file: 'lcov.info' }],
+  ],
+  // On ne garde que les bundles servis par l'application Angular.
+  entryFilter: (entry) => {
+    const url = entry.url as string;
+    return (
+      url.includes('localhost:4200') &&
+      !url.includes('@vite') &&
+      !url.includes('@fs') &&
+      !url.endsWith('/styles.css')
+    );
+  },
+  // On ne remonte que le code source de l'app, hors tests/config.
+  sourceFilter: (sourcePath) =>
+    sourcePath.search(/src\//u) !== -1 && !/\.(spec|config)\./u.test(sourcePath),
+};
 
 /**
  * Read environment variables from file.
@@ -22,7 +50,17 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['list'],
+    [
+      'monocart-reporter',
+      {
+        name: 'MDD — Rapport E2E',
+        outputFile: './playwright-report/index.html',
+        coverage,
+      },
+    ],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */

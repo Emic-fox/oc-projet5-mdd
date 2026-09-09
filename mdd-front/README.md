@@ -67,4 +67,25 @@ Le résumé s'affiche dans la console et un rapport détaillé est généré dan
 
 ### Tests end-to-end (Playwright)
 
-TODO
+```bash
+npm run e2e
+```
+
+Playwright démarre automatiquement `ng serve` (config `development`, source maps
+activées) puis exécute les specs de `e2e/` sur Chromium, Firefox et WebKit. Le
+rapport est généré dans `playwright-report/` (`npx monocart show-report
+playwright-report/index.html`).
+
+#### Couverture de code
+
+```bash
+npm run e2e:coverage
+```
+
+La couverture est collectée via l'API V8 de Playwright (Chromium uniquement,
+d'où le `--project=chromium`), puis remappée vers les sources TypeScript par
+`monocart-reporter`. La collecte est branchée automatiquement sur tous les
+tests via la fixture `e2e/fixtures/coverage.fixtures.ts` (neutre sur les autres
+navigateurs). Le résumé s'affiche dans la console et les rapports sont générés
+dans `coverage/e2e/` (`index.html` V8, `html-spa/` façon Istanbul, `lcov.info`).
+Le dossier `coverage/` est ignoré par Git.
