@@ -12,7 +12,7 @@ import { ApiError } from '@app/core/errors/api-error';
   <app-register-form (submitted)="onRegister($event)" />
 
   @if (error()) {
-    <p class="mt-4 text-center text-sm text-red-600" data-testid="error-messages">{{ error() }}</p>
+    <p class="mt-4 text-center text-sm text-red-600" data-testid="api-error">{{ error() }}</p>
   }`,
 })
 export class RegisterPage {
