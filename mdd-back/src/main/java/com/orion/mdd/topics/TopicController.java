@@ -2,16 +2,21 @@ package com.orion.mdd.topics;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.orion.mdd.auth.security.UserDetailsImpl;
 import com.orion.mdd.topics.dto.GetTopicCollectionRequest;
+import com.orion.mdd.topics.dto.SubscriptionResponse;
 import com.orion.mdd.topics.dto.TopicResponse;
 import com.orion.mdd.topics.dto.TopicResponseMapper;
 import com.orion.mdd.topics.dto.TopicWithSubscription;
@@ -53,5 +58,45 @@ public class TopicController {
             .toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Abonnement à un thème", description = "Abonne l'utilisateur connecté au thème donné")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Abonnement créé"),
+        @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Thème non trouvé", content = @Content),
+        @ApiResponse(responseCode = "409", description = "Utilisateur déjà abonné", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/{id}/subscription")
+    public ResponseEntity<SubscriptionResponse> subscribe(
+        @PathVariable Long id,
+        @AuthenticationPrincipal UserDetailsImpl authenticatedUser
+    ) {
+        topicService.subscribe(id, authenticatedUser.getId());
+
+        SubscriptionResponse response = new SubscriptionResponse(
+            new SubscriptionResponse.TopicRef(id),
+            new SubscriptionResponse.UserRef(authenticatedUser.getId())
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Désabonnement à un thème", description = "Désabonne l'utilisateur connecté du thème donné")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Désabonnement effectué"),
+        @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Thème non trouvé ou utilisateur non abonné", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/{id}/subscription")
+    public ResponseEntity<Void> unsubscribe(
+        @PathVariable Long id,
+        @AuthenticationPrincipal UserDetailsImpl authenticatedUser
+    ) {
+        topicService.unsubscribe(id, authenticatedUser.getId());
+
+        return ResponseEntity.noContent().build();
     }
 }

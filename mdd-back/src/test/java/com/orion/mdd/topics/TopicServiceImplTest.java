@@ -1,6 +1,7 @@
 package com.orion.mdd.topics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.orion.mdd.topics.dto.TopicWithSubscription;
+import com.orion.mdd.topics.exceptions.AlreadySubscribedException;
+import com.orion.mdd.topics.exceptions.NotSubscribedException;
+import com.orion.mdd.topics.exceptions.TopicNotFoundException;
 import com.orion.mdd.users.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -93,5 +97,73 @@ class TopicServiceImplTest {
         List<TopicWithSubscription> result = service.getAll(1L, false);
 
         assertThat(result).containsExactly(new TopicWithSubscription(topicWithoutSubscribers, false));
+    }
+
+    @Test
+    @DisplayName("subscribe lève TopicNotFoundException quand le topic n'existe pas")
+    void subscribe_throwsTopicNotFoundExceptionWhenTopicDoesNotExist() {
+        when(topicRepository.existsById(1L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.subscribe(1L, 42L))
+            .isInstanceOf(TopicNotFoundException.class);
+
+        verify(topicRepository, never()).insertSubscription(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("subscribe lève AlreadySubscribedException quand l'utilisateur est déjà abonné")
+    void subscribe_throwsAlreadySubscribedExceptionWhenAlreadySubscribed() {
+        when(topicRepository.existsById(1L)).thenReturn(true);
+        when(topicRepository.existsByIdAndSubscribersId(1L, 42L)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.subscribe(1L, 42L))
+            .isInstanceOf(AlreadySubscribedException.class);
+
+        verify(topicRepository, never()).insertSubscription(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("subscribe insère l'abonnement quand le topic existe et l'utilisateur n'est pas déjà abonné")
+    void subscribe_insertsSubscriptionWhenTopicExistsAndNotAlreadySubscribed() {
+        when(topicRepository.existsById(1L)).thenReturn(true);
+        when(topicRepository.existsByIdAndSubscribersId(1L, 42L)).thenReturn(false);
+
+        service.subscribe(1L, 42L);
+
+        verify(topicRepository).insertSubscription(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("unsubscribe lève TopicNotFoundException quand le topic n'existe pas")
+    void unsubscribe_throwsTopicNotFoundExceptionWhenTopicDoesNotExist() {
+        when(topicRepository.existsById(1L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.unsubscribe(1L, 42L))
+            .isInstanceOf(TopicNotFoundException.class);
+
+        verify(topicRepository, never()).deleteSubscription(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("unsubscribe lève NotSubscribedException quand l'utilisateur n'est pas abonné")
+    void unsubscribe_throwsNotSubscribedExceptionWhenNotSubscribed() {
+        when(topicRepository.existsById(1L)).thenReturn(true);
+        when(topicRepository.existsByIdAndSubscribersId(1L, 42L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.unsubscribe(1L, 42L))
+            .isInstanceOf(NotSubscribedException.class);
+
+        verify(topicRepository, never()).deleteSubscription(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("unsubscribe supprime l'abonnement quand le topic existe et l'utilisateur y est abonné")
+    void unsubscribe_deletesSubscriptionWhenTopicExistsAndSubscribed() {
+        when(topicRepository.existsById(1L)).thenReturn(true);
+        when(topicRepository.existsByIdAndSubscribersId(1L, 42L)).thenReturn(true);
+
+        service.unsubscribe(1L, 42L);
+
+        verify(topicRepository).deleteSubscription(1L, 42L);
     }
 }

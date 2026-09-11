@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.orion.mdd.topics.dto.TopicWithSubscription;
+import com.orion.mdd.topics.exceptions.AlreadySubscribedException;
+import com.orion.mdd.topics.exceptions.NotSubscribedException;
+import com.orion.mdd.topics.exceptions.TopicNotFoundException;
 
 @Service
 class TopicServiceImpl implements TopicService {
@@ -33,6 +36,32 @@ class TopicServiceImpl implements TopicService {
                 topic.getSubscribers().stream().anyMatch(user -> user.getId().equals(currentUserId))
             ))
             .toList();
+    }
+
+    @Override
+    @Transactional
+    public void subscribe(Long topicId, Long userId) {
+        if (!topicRepository.existsById(topicId)) {
+            throw new TopicNotFoundException();
+        }
+        if (topicRepository.existsByIdAndSubscribersId(topicId, userId)) {
+            throw new AlreadySubscribedException();
+        }
+
+        topicRepository.insertSubscription(topicId, userId);
+    }
+
+    @Override
+    @Transactional
+    public void unsubscribe(Long topicId, Long userId) {
+        if (!topicRepository.existsById(topicId)) {
+            throw new TopicNotFoundException();
+        }
+        if (!topicRepository.existsByIdAndSubscribersId(topicId, userId)) {
+            throw new NotSubscribedException();
+        }
+
+        topicRepository.deleteSubscription(topicId, userId);
     }
 
 }

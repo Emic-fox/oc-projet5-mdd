@@ -1,10 +1,14 @@
 package com.orion.mdd.topics;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,6 +32,9 @@ import com.orion.mdd.auth.security.UserDetailsImpl;
 import com.orion.mdd.topics.dto.TopicResponse;
 import com.orion.mdd.topics.dto.TopicResponseMapper;
 import com.orion.mdd.topics.dto.TopicWithSubscription;
+import com.orion.mdd.topics.exceptions.AlreadySubscribedException;
+import com.orion.mdd.topics.exceptions.NotSubscribedException;
+import com.orion.mdd.topics.exceptions.TopicNotFoundException;
 import com.orion.mdd.users.User;
 
 /**
@@ -120,5 +127,83 @@ class TopicControllerTest {
 
         verifyNoInteractions(topicService);
         verifyNoInteractions(topicResponseMapper);
+    }
+
+    @Test
+    @DisplayName("subscribe renvoie 201 et le couple topic/user quand l'abonnement est créé")
+    void subscribe_returns201WithTopicAndUserWhenCreated() throws Exception {
+        doNothing().when(topicService).subscribe(1L, 42L);
+
+        mockMvc.perform(post("/api/topics/1/subscription").with(authentication(authFor(alice()))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.topic.id").value(1))
+                .andExpect(jsonPath("$.user.id").value(42));
+
+        verify(topicService).subscribe(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("subscribe renvoie 404 quand le topic n'existe pas")
+    void subscribe_returns404WhenTopicNotFound() throws Exception {
+        doThrow(new TopicNotFoundException()).when(topicService).subscribe(1L, 42L);
+
+        mockMvc.perform(post("/api/topics/1/subscription").with(authentication(authFor(alice()))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("subscribe renvoie 409 quand l'utilisateur est déjà abonné")
+    void subscribe_returns409WhenAlreadySubscribed() throws Exception {
+        doThrow(new AlreadySubscribedException()).when(topicService).subscribe(1L, 42L);
+
+        mockMvc.perform(post("/api/topics/1/subscription").with(authentication(authFor(alice()))))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("subscribe renvoie 401 quand la requête n'est pas authentifiée")
+    void subscribe_returns401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/topics/1/subscription"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(topicService);
+    }
+
+    @Test
+    @DisplayName("unsubscribe renvoie 204 quand le désabonnement est effectué")
+    void unsubscribe_returns204WhenDeleted() throws Exception {
+        doNothing().when(topicService).unsubscribe(1L, 42L);
+
+        mockMvc.perform(delete("/api/topics/1/subscription").with(authentication(authFor(alice()))))
+                .andExpect(status().isNoContent());
+
+        verify(topicService).unsubscribe(1L, 42L);
+    }
+
+    @Test
+    @DisplayName("unsubscribe renvoie 404 quand le topic n'existe pas")
+    void unsubscribe_returns404WhenTopicNotFound() throws Exception {
+        doThrow(new TopicNotFoundException()).when(topicService).unsubscribe(1L, 42L);
+
+        mockMvc.perform(delete("/api/topics/1/subscription").with(authentication(authFor(alice()))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("unsubscribe renvoie 404 quand l'utilisateur n'est pas abonné")
+    void unsubscribe_returns404WhenNotSubscribed() throws Exception {
+        doThrow(new NotSubscribedException()).when(topicService).unsubscribe(1L, 42L);
+
+        mockMvc.perform(delete("/api/topics/1/subscription").with(authentication(authFor(alice()))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("unsubscribe renvoie 401 quand la requête n'est pas authentifiée")
+    void unsubscribe_returns401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(delete("/api/topics/1/subscription"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(topicService);
     }
 }
