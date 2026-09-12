@@ -59,7 +59,7 @@ describe('Button', () => {
       const classes = getButton().className;
 
       expect(classes).toContain('bg-white');
-      expect(classes).toContain('enabled:hover:bg-gray-100');
+      expect(classes).toContain('enabled:hover:bg-neutral-100');
       expect(classes).not.toContain('bg-primary');
     });
 

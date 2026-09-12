@@ -5,3 +5,7 @@
     --color-primary: #7763C5;
     --font-sans: Inter, Arial, sans-serif;
 }
+
+html {
+    font-size: 14px;
+}

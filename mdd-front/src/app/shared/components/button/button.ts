@@ -16,8 +16,8 @@ export class Button {
     const baseClasses = 'cursor-pointer rounded-md border px-4 py-1 disabled:opacity-50 disabled:cursor-not-allowed';
     const variantClasses =
       this.variant() === 'primary'
-        ? 'bg-primary text-white enabled:hover:opacity-90'
-        : 'bg-white enabled:hover:bg-gray-100';
+        ? 'bg-primary disabled:bg-neutral-600 text-white enabled:hover:opacity-90'
+        : 'bg-white enabled:hover:bg-neutral-100';
 
     return `${baseClasses} ${variantClasses} ${this.class()}`;
   });
