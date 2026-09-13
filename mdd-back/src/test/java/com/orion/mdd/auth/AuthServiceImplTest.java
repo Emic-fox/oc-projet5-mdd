@@ -158,4 +158,74 @@ class AuthServiceImplTest {
             assertThat(service.me(1L)).isSameAs(alice);
         }
     }
+
+    @Nested
+    @DisplayName("updateMe")
+    class UpdateMe {
+
+        @Test
+        @DisplayName("met à jour l'email et le username puis renvoie l'utilisateur")
+        void updatesEmailAndUsernameAndReturnsUser() {
+            User alice = alice();
+            when(userService.loadById(1L)).thenReturn(alice);
+            when(userService.existsByEmailAndNotId("alice2@mdd.com", 1L)).thenReturn(false);
+            when(userService.existsByUsernameAndNotId("alice2", 1L)).thenReturn(false);
+            when(userService.create(alice)).thenReturn(alice);
+
+            User result = service.updateMe(1L, "alice2@mdd.com", "alice2");
+
+            assertThat(result).isSameAs(alice);
+            assertThat(alice.getEmail()).isEqualTo("alice2@mdd.com");
+            assertThat(alice.getUsername()).isEqualTo("alice2");
+
+            verify(userService).create(alice);
+        }
+
+        @Test
+        @DisplayName("lève EmailAlreadyUsedException et ne modifie rien quand l'email appartient à un autre compte")
+        void throwsWhenEmailAlreadyUsedByAnotherAccount() {
+            User alice = alice();
+            when(userService.loadById(1L)).thenReturn(alice);
+            when(userService.existsByEmailAndNotId("bob@mdd.com", 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> service.updateMe(1L, "bob@mdd.com", "alice2"))
+                    .isInstanceOf(EmailAlreadyUsedException.class);
+
+            assertThat(alice.getEmail()).isEqualTo("alice@mdd.com");
+            verify(userService, never()).create(any());
+        }
+
+        @Test
+        @DisplayName("lève UsernameAlreadyUsedException et ne modifie rien quand le username appartient à un autre compte")
+        void throwsWhenUsernameAlreadyUsedByAnotherAccount() {
+            User alice = alice();
+            when(userService.loadById(1L)).thenReturn(alice);
+            when(userService.existsByEmailAndNotId("alice2@mdd.com", 1L)).thenReturn(false);
+            when(userService.existsByUsernameAndNotId("bob", 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> service.updateMe(1L, "alice2@mdd.com", "bob"))
+                    .isInstanceOf(UsernameAlreadyUsedException.class);
+
+            assertThat(alice.getUsername()).isEqualTo("alice");
+            verify(userService, never()).create(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("updatePassword")
+    class UpdatePassword {
+
+        @Test
+        @DisplayName("encode le nouveau mot de passe et persiste l'utilisateur")
+        void encodesNewPasswordAndPersistsUser() {
+            User alice = alice();
+            when(userService.loadById(1L)).thenReturn(alice);
+            when(passwordEncoder.encode("newSecret1234")).thenReturn("newHashed");
+
+            service.updatePassword(1L, "newSecret1234");
+
+            assertThat(alice.getPassword()).isEqualTo("newHashed");
+            verify(userService).create(alice);
+        }
+    }
 }

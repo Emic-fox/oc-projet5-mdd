@@ -66,4 +66,30 @@ class AuthServiceImpl implements AuthService {
         return userService.loadById(userId);
     }
 
+    @Override
+    @Transactional
+    public User updateMe(Long userId, String email, String username) {
+        User user = userService.loadById(userId);
+
+        if (userService.existsByEmailAndNotId(email, userId)) {
+            throw new EmailAlreadyUsedException();
+        }
+        if (userService.existsByUsernameAndNotId(username, userId)) {
+            throw new UsernameAlreadyUsedException();
+        }
+
+        user.setEmail(email);
+        user.setUsername(username);
+
+        return userService.create(user);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(Long userId, String rawPassword) {
+        User user = userService.loadById(userId);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        userService.create(user);
+    }
+
 }

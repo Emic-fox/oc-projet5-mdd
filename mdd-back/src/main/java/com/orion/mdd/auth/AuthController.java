@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +15,10 @@ import com.orion.mdd.auth.dto.LoginRequest;
 import com.orion.mdd.auth.dto.MeResponse;
 import com.orion.mdd.auth.dto.MeResponseMapper;
 import com.orion.mdd.auth.dto.RegisterRequest;
+import com.orion.mdd.auth.dto.UpdateMeRequest;
+import com.orion.mdd.auth.dto.UpdatePasswordRequest;
 import com.orion.mdd.auth.security.UserDetailsImpl;
+import com.orion.mdd.users.User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,6 +74,35 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<MeResponse> currentUser(@AuthenticationPrincipal UserDetailsImpl authenticatedUser) {
         return ResponseEntity.ok(this.meResponseMapper.toMeResponse(this.authService.me(authenticatedUser.getId())));
+    }
+
+    @Operation(summary = "Met à jour le profil de l'utilisateur actuellement authentifié", description = "Cette opération permet à l'utilisateur authentifié de mettre à jour son adresse e-mail et son nom d'utilisateur.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profil mis à jour avec succès"),
+            @ApiResponse(responseCode = "400", description = "Échec de la mise à jour, données invalides", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Échec de la mise à jour, username ou email déjà utilisé", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/me")
+    public ResponseEntity<MeResponse> updateCurrentUser(@AuthenticationPrincipal UserDetailsImpl authenticatedUser,
+            @Valid @RequestBody UpdateMeRequest request) {
+        User user = this.authService.updateMe(authenticatedUser.getId(), request.email(), request.username());
+        return ResponseEntity.ok(this.meResponseMapper.toMeResponse(user));
+    }
+
+    @Operation(summary = "Change le mot de passe de l'utilisateur actuellement authentifié", description = "Cette opération permet à l'utilisateur authentifié de changer son mot de passe.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Mot de passe mis à jour avec succès"),
+            @ApiResponse(responseCode = "400", description = "Échec de la mise à jour, mot de passe invalide", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> updateCurrentPassword(@AuthenticationPrincipal UserDetailsImpl authenticatedUser,
+            @Valid @RequestBody UpdatePasswordRequest request) {
+        this.authService.updatePassword(authenticatedUser.getId(), request.newPassword());
+        return ResponseEntity.noContent().build();
     }
 
 }

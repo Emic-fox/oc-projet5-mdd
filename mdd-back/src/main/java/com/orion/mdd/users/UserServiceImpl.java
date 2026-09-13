@@ -33,6 +33,16 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean existsByEmailAndNotId(String email, Long id) {
+        return userRepository.existsByEmailAndIdNot(email, id);
+    }
+
+    @Override
+    public boolean existsByUsernameAndNotId(String username, Long id) {
+        return userRepository.existsByUsernameAndIdNot(username, id);
+    }
+
+    @Override
     public User create(User user) {
         return userRepository.save(user);
     }

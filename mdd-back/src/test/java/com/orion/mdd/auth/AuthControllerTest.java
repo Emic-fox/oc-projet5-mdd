@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,6 +32,8 @@ import com.orion.mdd.auth.dto.LoginRequest;
 import com.orion.mdd.auth.dto.MeResponse;
 import com.orion.mdd.auth.dto.MeResponseMapper;
 import com.orion.mdd.auth.dto.RegisterRequest;
+import com.orion.mdd.auth.dto.UpdateMeRequest;
+import com.orion.mdd.auth.dto.UpdatePasswordRequest;
 import com.orion.mdd.auth.exceptions.EmailAlreadyUsedException;
 import com.orion.mdd.auth.exceptions.InvalidCredentialsException;
 import com.orion.mdd.auth.exceptions.UsernameAlreadyUsedException;
@@ -76,6 +79,11 @@ class AuthControllerTest {
 
     private String asJson(Object body) {
         return objectMapper.writeValueAsString(body);
+    }
+
+    private Authentication authFor(User user) {
+        UserDetailsImpl principal = UserDetailsImpl.fromUser(user);
+        return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }
 
     @Nested
@@ -239,10 +247,143 @@ class AuthControllerTest {
 
             verifyNoInteractions(authService);
         }
+    }
 
-        private Authentication authFor(User user) {
-            UserDetailsImpl principal = UserDetailsImpl.fromUser(user);
-            return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+    @Nested
+    @DisplayName("PUT /api/auth/me")
+    class UpdateMe {
+
+        private final User alice = new User("alice@mdd.com", "alice", "hashed");
+        {
+            alice.setId(42L);
+        }
+
+        private UpdateMeRequest validRequest() {
+            return new UpdateMeRequest("alice2@mdd.com", "alice2");
+        }
+
+        @Test
+        @DisplayName("renvoie 200 et le profil mis à jour quand le corps est valide")
+        void returnsUpdatedProfileWhenPayloadIsValid() throws Exception {
+            LocalDateTime createdAt = LocalDateTime.of(2026, 9, 1, 0, 0);
+            when(authService.updateMe(42L, "alice2@mdd.com", "alice2")).thenReturn(alice);
+            when(meResponseMapper.toMeResponse(alice))
+                    .thenReturn(new MeResponse(42L, "alice2@mdd.com", "alice2", createdAt));
+
+            mockMvc.perform(put("/api/auth/me")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(validRequest())))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(42))
+                    .andExpect(jsonPath("$.email").value("alice2@mdd.com"))
+                    .andExpect(jsonPath("$.username").value("alice2"));
+
+            verify(authService).updateMe(42L, "alice2@mdd.com", "alice2");
+        }
+
+        @Test
+        @DisplayName("renvoie 400 quand l'email est mal formé")
+        void returns400WhenEmailIsInvalid() throws Exception {
+            mockMvc.perform(put("/api/auth/me")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(new UpdateMeRequest("not-an-email", "alice2"))))
+                    .andExpect(status().isBadRequest());
+
+            verify(authService, never()).updateMe(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("renvoie 400 quand le username est trop court (contrainte @Username)")
+        void returns400WhenUsernameIsTooShort() throws Exception {
+            mockMvc.perform(put("/api/auth/me")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(new UpdateMeRequest("alice2@mdd.com", "al"))))
+                    .andExpect(status().isBadRequest());
+
+            verify(authService, never()).updateMe(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("renvoie 409 quand l'email est déjà utilisé par un autre compte")
+        void returns409WhenEmailAlreadyUsed() throws Exception {
+            when(authService.updateMe(any(), any(), any())).thenThrow(new EmailAlreadyUsedException());
+
+            mockMvc.perform(put("/api/auth/me")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(validRequest())))
+                    .andExpect(status().isConflict());
+        }
+
+        @Test
+        @DisplayName("renvoie 409 quand le username est déjà utilisé par un autre compte")
+        void returns409WhenUsernameAlreadyUsed() throws Exception {
+            when(authService.updateMe(any(), any(), any())).thenThrow(new UsernameAlreadyUsedException());
+
+            mockMvc.perform(put("/api/auth/me")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(validRequest())))
+                    .andExpect(status().isConflict());
+        }
+
+        @Test
+        @DisplayName("renvoie 401 quand la requête n'est pas authentifiée")
+        void returns401WhenNotAuthenticated() throws Exception {
+            mockMvc.perform(put("/api/auth/me")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(validRequest())))
+                    .andExpect(status().isUnauthorized());
+
+            verifyNoInteractions(authService);
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /api/auth/me/password")
+    class UpdatePassword {
+
+        private final User alice = new User("alice@mdd.com", "alice", "hashed");
+        {
+            alice.setId(42L);
+        }
+
+        @Test
+        @DisplayName("renvoie 204 quand le mot de passe est valide")
+        void returns204WhenPasswordIsValid() throws Exception {
+            mockMvc.perform(put("/api/auth/me/password")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(new UpdatePasswordRequest("NewSecret123!"))))
+                    .andExpect(status().isNoContent());
+
+            verify(authService).updatePassword(42L, "NewSecret123!");
+        }
+
+        @Test
+        @DisplayName("renvoie 400 quand le mot de passe ne respecte pas @StrongPassword")
+        void returns400WhenPasswordIsWeak() throws Exception {
+            mockMvc.perform(put("/api/auth/me/password")
+                            .with(authentication(authFor(alice)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(new UpdatePasswordRequest("weak"))))
+                    .andExpect(status().isBadRequest());
+
+            verify(authService, never()).updatePassword(any(), any());
+        }
+
+        @Test
+        @DisplayName("renvoie 401 quand la requête n'est pas authentifiée")
+        void returns401WhenNotAuthenticated() throws Exception {
+            mockMvc.perform(put("/api/auth/me/password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJson(new UpdatePasswordRequest("NewSecret123!"))))
+                    .andExpect(status().isUnauthorized());
+
+            verifyNoInteractions(authService);
         }
     }
 }

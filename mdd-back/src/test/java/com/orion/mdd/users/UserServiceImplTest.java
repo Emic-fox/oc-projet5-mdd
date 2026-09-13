@@ -77,4 +77,24 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> service.loadById(99L))
                 .isInstanceOf(UserNotFoundException.class);
     }
+
+    @Test
+    @DisplayName("existsByEmailAndNotId délègue à existsByEmailAndIdNot")
+    void existsByEmailAndNotId_delegatesToRepository() {
+        when(userRepository.existsByEmailAndIdNot("alice@mdd.com", 1L)).thenReturn(true);
+
+        assertThat(service.existsByEmailAndNotId("alice@mdd.com", 1L)).isTrue();
+
+        verify(userRepository).existsByEmailAndIdNot("alice@mdd.com", 1L);
+    }
+
+    @Test
+    @DisplayName("existsByUsernameAndNotId délègue à existsByUsernameAndIdNot")
+    void existsByUsernameAndNotId_delegatesToRepository() {
+        when(userRepository.existsByUsernameAndIdNot("alice", 1L)).thenReturn(false);
+
+        assertThat(service.existsByUsernameAndNotId("alice", 1L)).isFalse();
+
+        verify(userRepository).existsByUsernameAndIdNot("alice", 1L);
+    }
 }

@@ -91,4 +91,32 @@ class UserRepositoryTest {
         assertThatThrownBy(() -> em.persistAndFlush(duplicate))
                 .isInstanceOf(PersistenceException.class);
     }
+
+    @Test
+    @DisplayName("existsByEmailAndIdNot renvoie true quand un autre compte utilise déjà l'email")
+    void existsByEmailAndIdNot_returnsTrueWhenUsedByAnotherAccount() {
+        assertThat(repository.existsByEmailAndIdNot("alice@mdd.com", alice.getId() + 1))
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("existsByEmailAndIdNot renvoie false quand l'email appartient au compte exclu")
+    void existsByEmailAndIdNot_returnsFalseWhenOwnedByExcludedAccount() {
+        assertThat(repository.existsByEmailAndIdNot("alice@mdd.com", alice.getId()))
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("existsByUsernameAndIdNot renvoie true quand un autre compte utilise déjà le username")
+    void existsByUsernameAndIdNot_returnsTrueWhenUsedByAnotherAccount() {
+        assertThat(repository.existsByUsernameAndIdNot("alice", alice.getId() + 1))
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("existsByUsernameAndIdNot renvoie false quand le username appartient au compte exclu")
+    void existsByUsernameAndIdNot_returnsFalseWhenOwnedByExcludedAccount() {
+        assertThat(repository.existsByUsernameAndIdNot("alice", alice.getId()))
+                .isFalse();
+    }
 }

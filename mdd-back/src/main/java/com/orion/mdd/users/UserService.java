@@ -10,5 +10,9 @@ public interface UserService {
 
     boolean existsByUsername(String username);
 
+    boolean existsByEmailAndNotId(String email, Long id);
+
+    boolean existsByUsernameAndNotId(String username, Long id);
+
     User create(User user);
 }
