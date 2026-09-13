@@ -1,11 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TopicCard } from './topic-card';
 import { Topic } from '../../models/topic.interface';
+import { environment } from '@/environments/environment';
 
 describe('TopicCard', () => {
   let component: TopicCard;
   let fixture: ComponentFixture<TopicCard>;
+  let httpMock: HttpTestingController;
 
   const topic: Topic = {
     id: 1,
@@ -25,12 +32,18 @@ describe('TopicCard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TopicCard],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TopicCard);
     component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
     fixture.componentRef.setInput('topic', topic);
     await fixture.whenStable();
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should create', () => {
@@ -60,8 +73,9 @@ describe('TopicCard', () => {
       component.subscribe.subscribe(subscribeSpy);
 
       getButton().click();
+      httpMock.expectOne(`${environment.apiUrl}/api/topics/1/subscription`).flush({});
 
-      expect(subscribeSpy).toHaveBeenCalled();
+      expect(subscribeSpy).toHaveBeenCalledWith(1);
     });
   });
 
@@ -80,8 +94,9 @@ describe('TopicCard', () => {
       component.unsubscribe.subscribe(unsubscribeSpy);
 
       getButton().click();
+      httpMock.expectOne(`${environment.apiUrl}/api/topics/1/subscription`).flush({});
 
-      expect(unsubscribeSpy).toHaveBeenCalled();
+      expect(unsubscribeSpy).toHaveBeenCalledWith(1);
     });
   });
 
@@ -96,7 +111,8 @@ describe('TopicCard', () => {
     });
 
     it('should not emit unsubscribe when clicking the button', () => {
-      setTopic({ subscribed: false });
+      fixture.componentRef.setInput('allowUnsubcription', false);
+      setTopic({ subscribed: true });
       const unsubscribeSpy = vi.fn();
       component.unsubscribe.subscribe(unsubscribeSpy);
 

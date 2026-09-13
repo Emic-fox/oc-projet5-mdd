@@ -66,4 +66,30 @@ describe('TopicsList', () => {
 
     expect(fixture.debugElement.queryAll(By.css('app-topic-card')).length).toBe(0);
   });
+
+  it('should forward the subscribe event emitted by a topic card', () => {
+    fixture.componentRef.setInput('topics', topics);
+    fixture.detectChanges();
+
+    const subscribeSpy = vi.fn();
+    component.subscribe.subscribe(subscribeSpy);
+
+    const card = fixture.debugElement.query(By.css('app-topic-card')).componentInstance as TopicCard;
+    card.subscribe.emit(topics[0].id);
+
+    expect(subscribeSpy).toHaveBeenCalledWith(topics[0].id);
+  });
+
+  it('should forward the unsubscribe event emitted by a topic card', () => {
+    fixture.componentRef.setInput('topics', topics);
+    fixture.detectChanges();
+
+    const unsubscribeSpy = vi.fn();
+    component.unsubscribe.subscribe(unsubscribeSpy);
+
+    const card = fixture.debugElement.query(By.css('app-topic-card')).componentInstance as TopicCard;
+    card.unsubscribe.emit(topics[0].id);
+
+    expect(unsubscribeSpy).toHaveBeenCalledWith(topics[0].id);
+  });
 });

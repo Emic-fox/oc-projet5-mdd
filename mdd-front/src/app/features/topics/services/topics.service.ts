@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { GetTopicsRequest } from '../models/get-topics-request.interface';
-import { Topic } from '../models/topic.interface';
 import { environment } from '@/environments/environment';
+import { GetTopicsRequest } from '../models/get-topics-request.interface';
+import { PostSubscriptionResponse } from '../models/post-subscription-response.interface';
+import { Topic } from '../models/topic.interface';
 
 @Service()
 export class TopicsService {
@@ -12,5 +13,13 @@ export class TopicsService {
 
     getTopics(request: GetTopicsRequest = {}) {
         return this.http.get<Topic[]>(this.path, { params: { ...request } });
+    }
+
+    subscribe(topicId: number) {
+        return this.http.post<PostSubscriptionResponse>(`${this.path}/${topicId}/subscription`, {});
+    }
+
+    unsubscribe(topicId: number) {
+        return this.http.delete(`${this.path}/${topicId}/subscription`);
     }
 }

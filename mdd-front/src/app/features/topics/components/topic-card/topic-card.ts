@@ -1,7 +1,9 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { Topic } from '../../models/topic.interface';
 import { Button } from '@/app/shared/components/button/button';
 import { Card } from '@/app/shared/components/card/card';
+import { TopicsService } from '../../services/topics.service';
+import { tap } from 'rxjs';
 
 @Component({
   imports: [Button, Card],
@@ -19,9 +21,11 @@ import { Card } from '@/app/shared/components/card/card';
 export class TopicCard {
   topic = input.required<Topic>();
   allowUnsubcription = input<boolean>(true);
-  
-  subscribe = output<void>();
-  unsubscribe = output<void>();
+
+  subscribe = output<number>();
+  unsubscribe = output<number>();
+
+  topicsService = inject(TopicsService);
 
   subscribeButtonLabel = computed<string>(() => {
     if (this.topic().subscribed) {
@@ -37,10 +41,15 @@ export class TopicCard {
 
   onSubscribeClick(event: Event) {
     event.preventDefault();
+    const id = this.topic().id;
     if (this.topic().subscribed) {
-      this.unsubscribe.emit();
+      this.topicsService.unsubscribe(id).pipe(
+        tap(() => this.unsubscribe.emit(id))
+      ).subscribe();
     } else {
-      this.subscribe.emit();
+      this.topicsService.subscribe(id).pipe(
+        tap(() => this.subscribe.emit(id))
+      ).subscribe();
     }
   }
 }

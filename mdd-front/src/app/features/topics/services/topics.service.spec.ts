@@ -53,4 +53,25 @@ describe('TopicsService', () => {
     expect(req.request.params.get('subscribed')).toBe('true');
     req.flush(topics);
   });
+
+  it('should post a subscription for the given topic', () => {
+    const response = { topic: { id: 1 }, user: { id: 42 } };
+
+    service.subscribe(1).subscribe((result) => {
+      expect(result).toEqual(response);
+    });
+
+    const req = httpMock.expectOne(`${url}/1/subscription`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush(response);
+  });
+
+  it('should delete the subscription for the given topic', () => {
+    service.unsubscribe(1).subscribe();
+
+    const req = httpMock.expectOne(`${url}/1/subscription`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });
