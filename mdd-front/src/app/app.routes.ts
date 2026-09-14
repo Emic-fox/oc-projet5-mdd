@@ -22,6 +22,11 @@ export const routes: Routes = [
             path: 'topics',
             loadComponent: () => import('./features/topics/pages/topics-page/topics-page').then(m => m.TopicsPage),
             title: "Thèmes"
+        },
+        {
+            path: 'profile',
+            loadComponent: () => import('./features/profile/pages/profile-page/profile-page').then(m => m.ProfilePage),
+            title: "Profil"
         }
     ] },
     { path: '**', redirectTo: '' }
