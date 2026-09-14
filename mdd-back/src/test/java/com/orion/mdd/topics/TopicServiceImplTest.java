@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
@@ -97,6 +98,26 @@ class TopicServiceImplTest {
         List<TopicWithSubscription> result = service.getAll(1L, false);
 
         assertThat(result).containsExactly(new TopicWithSubscription(topicWithoutSubscribers, false));
+    }
+
+    @Test
+    @DisplayName("getById renvoie le topic quand il existe")
+    void getById_returnsTopicWhenExists() {
+        Topic topic = topicWithSubscribers(1L);
+        when(topicRepository.findById(1L)).thenReturn(Optional.of(topic));
+
+        Topic result = service.getById(1L);
+
+        assertThat(result).isEqualTo(topic);
+    }
+
+    @Test
+    @DisplayName("getById lève TopicNotFoundException quand le topic n'existe pas")
+    void getById_throwsTopicNotFoundExceptionWhenNotFound() {
+        when(topicRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getById(1L))
+            .isInstanceOf(TopicNotFoundException.class);
     }
 
     @Test

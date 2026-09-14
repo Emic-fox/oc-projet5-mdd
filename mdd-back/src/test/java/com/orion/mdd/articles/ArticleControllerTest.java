@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,6 +33,7 @@ import com.orion.mdd.auth.security.JwtService;
 import com.orion.mdd.auth.security.SecurityConfig;
 import com.orion.mdd.auth.security.UserDetailsImpl;
 import com.orion.mdd.topics.Topic;
+import com.orion.mdd.topics.exceptions.TopicNotFoundException;
 import com.orion.mdd.users.User;
 
 /**
@@ -175,6 +178,71 @@ class ArticleControllerTest {
     @DisplayName("renvoie 401 quand la requête n'est pas authentifiée")
     void getArticle_returns401WhenNotAuthenticated() throws Exception {
         mockMvc.perform(get("/api/articles/1"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(articleService);
+    }
+
+    @Test
+    @DisplayName("renvoie 201 et l'article créé")
+    void createArticle_returns201WithCreatedArticle() throws Exception {
+        Article article = article(1L);
+        when(articleService.create(1L, 42L, "Titre", "Contenu")).thenReturn(article);
+        when(articleResponseMapper.toArticleResponse(article)).thenReturn(response(1L));
+
+        mockMvc.perform(post("/api/articles")
+                .with(authentication(authFor(alice())))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"topic_id": 1, "title": "Titre", "content": "Contenu"}
+                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Titre"))
+                .andExpect(jsonPath("$.topic.id").value(1))
+                .andExpect(jsonPath("$.topic.name").value("Java"))
+                .andExpect(jsonPath("$.author.id").value(42))
+                .andExpect(jsonPath("$.author.username").value("alice"));
+
+        verify(articleService).create(1L, 42L, "Titre", "Contenu");
+    }
+
+    @Test
+    @DisplayName("renvoie 400 quand le corps de la requête est invalide")
+    void createArticle_returns400WhenRequestIsInvalid() throws Exception {
+        mockMvc.perform(post("/api/articles")
+                .with(authentication(authFor(alice())))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"topic_id": null, "title": "", "content": ""}
+                """))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(articleService);
+    }
+
+    @Test
+    @DisplayName("renvoie 404 quand le thème n'existe pas")
+    void createArticle_returns404WhenTopicNotFound() throws Exception {
+        doThrow(new TopicNotFoundException()).when(articleService).create(1L, 42L, "Titre", "Contenu");
+
+        mockMvc.perform(post("/api/articles")
+                .with(authentication(authFor(alice())))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"topic_id": 1, "title": "Titre", "content": "Contenu"}
+                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("renvoie 401 quand la requête n'est pas authentifiée")
+    void createArticle_returns401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/articles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"topic_id": 1, "title": "Titre", "content": "Contenu"}
+                """))
                 .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(articleService);

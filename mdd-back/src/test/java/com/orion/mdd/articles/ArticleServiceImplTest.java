@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +23,10 @@ import org.springframework.data.domain.Sort;
 
 import com.orion.mdd.articles.exceptions.ArticleNotFoundException;
 import com.orion.mdd.topics.Topic;
+import com.orion.mdd.topics.TopicService;
+import com.orion.mdd.topics.exceptions.TopicNotFoundException;
 import com.orion.mdd.users.User;
+import com.orion.mdd.users.UserService;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit")
@@ -32,6 +36,12 @@ class ArticleServiceImplTest {
 
     @Mock
     private ArticleRepository articleRepository;
+
+    @Mock
+    private TopicService topicService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private ArticleServiceImpl service;
@@ -111,5 +121,33 @@ class ArticleServiceImplTest {
 
         assertThatThrownBy(() -> service.getById(1L))
             .isInstanceOf(ArticleNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("create sauvegarde un article avec le topic et l'auteur résolus")
+    void create_savesArticleWithResolvedTopicAndAuthor() {
+        Topic topic = topicWithId(1L);
+        User author = userWithId(42L);
+        when(topicService.getById(1L)).thenReturn(topic);
+        when(userService.loadById(42L)).thenReturn(author);
+        when(articleRepository.save(any(Article.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Article result = service.create(1L, 42L, "Titre", "Contenu");
+
+        assertThat(result.getTitle()).isEqualTo("Titre");
+        assertThat(result.getContent()).isEqualTo("Contenu");
+        assertThat(result.getTopic()).isEqualTo(topic);
+        assertThat(result.getAuthor()).isEqualTo(author);
+    }
+
+    @Test
+    @DisplayName("create lève TopicNotFoundException quand le topic n'existe pas")
+    void create_throwsTopicNotFoundExceptionWhenTopicDoesNotExist() {
+        when(topicService.getById(1L)).thenThrow(new TopicNotFoundException());
+
+        assertThatThrownBy(() -> service.create(1L, 42L, "Titre", "Contenu"))
+            .isInstanceOf(TopicNotFoundException.class);
+
+        verify(articleRepository, never()).save(any());
     }
 }

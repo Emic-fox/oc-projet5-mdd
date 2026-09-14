@@ -39,6 +39,13 @@ class TopicServiceImpl implements TopicService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Topic getById(Long id) {
+        return topicRepository.findById(id)
+            .orElseThrow(TopicNotFoundException::new);
+    }
+
+    @Override
     @Transactional
     public void subscribe(Long topicId, Long userId) {
         if (!topicRepository.existsById(topicId)) {
