@@ -68,7 +68,7 @@ class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User updateMe(Long userId, String email, String username) {
+    public UpdateMeResult updateMe(Long userId, String email, String username) {
         User user = userService.loadById(userId);
 
         if (userService.existsByEmailAndNotId(email, userId)) {
@@ -81,7 +81,10 @@ class AuthServiceImpl implements AuthService {
         user.setEmail(email);
         user.setUsername(username);
 
-        return userService.create(user);
+        User updated = userService.create(user);
+        // Le jeton précédent porte l'ancien username en sujet : on en émet un nouveau
+        // pour que le client reste authentifié même si le username a changé.
+        return new UpdateMeResult(updated, jwtService.generateToken(updated.getUsername()));
     }
 
     @Override

@@ -164,17 +164,19 @@ class AuthServiceImplTest {
     class UpdateMe {
 
         @Test
-        @DisplayName("met à jour l'email et le username puis renvoie l'utilisateur")
-        void updatesEmailAndUsernameAndReturnsUser() {
+        @DisplayName("met à jour l'email et le username puis renvoie l'utilisateur et un nouveau jeton")
+        void updatesEmailAndUsernameAndReturnsUserAndToken() {
             User alice = alice();
             when(userService.loadById(1L)).thenReturn(alice);
             when(userService.existsByEmailAndNotId("alice2@mdd.com", 1L)).thenReturn(false);
             when(userService.existsByUsernameAndNotId("alice2", 1L)).thenReturn(false);
             when(userService.create(alice)).thenReturn(alice);
+            when(jwtService.generateToken("alice2")).thenReturn("jwt-token");
 
-            User result = service.updateMe(1L, "alice2@mdd.com", "alice2");
+            UpdateMeResult result = service.updateMe(1L, "alice2@mdd.com", "alice2");
 
-            assertThat(result).isSameAs(alice);
+            assertThat(result.user()).isSameAs(alice);
+            assertThat(result.token()).isEqualTo("jwt-token");
             assertThat(alice.getEmail()).isEqualTo("alice2@mdd.com");
             assertThat(alice.getUsername()).isEqualTo("alice2");
 

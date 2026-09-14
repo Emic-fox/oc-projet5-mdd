@@ -14,11 +14,11 @@ import com.orion.mdd.auth.dto.AuthResponse;
 import com.orion.mdd.auth.dto.LoginRequest;
 import com.orion.mdd.auth.dto.MeResponse;
 import com.orion.mdd.auth.dto.MeResponseMapper;
+import com.orion.mdd.auth.dto.MeUpdateResponse;
 import com.orion.mdd.auth.dto.RegisterRequest;
 import com.orion.mdd.auth.dto.UpdateMeRequest;
 import com.orion.mdd.auth.dto.UpdatePasswordRequest;
 import com.orion.mdd.auth.security.UserDetailsImpl;
-import com.orion.mdd.users.User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -76,19 +76,20 @@ public class AuthController {
         return ResponseEntity.ok(this.meResponseMapper.toMeResponse(this.authService.me(authenticatedUser.getId())));
     }
 
-    @Operation(summary = "Met à jour le profil de l'utilisateur actuellement authentifié", description = "Cette opération permet à l'utilisateur authentifié de mettre à jour son adresse e-mail et son nom d'utilisateur.")
+    @Operation(summary = "Met à jour le profil de l'utilisateur actuellement authentifié", description = "Cette opération permet à l'utilisateur authentifié de mettre à jour son adresse e-mail et son nom d'utilisateur. Un nouveau jeton JWT est renvoyé : l'ancien porte l'ancien username en sujet et devient invalide si celui-ci a changé.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profil mis à jour avec succès"),
+            @ApiResponse(responseCode = "200", description = "Profil mis à jour avec succès, nouveau jeton JWT retourné"),
             @ApiResponse(responseCode = "400", description = "Échec de la mise à jour, données invalides", content = @Content),
             @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content),
             @ApiResponse(responseCode = "409", description = "Échec de la mise à jour, username ou email déjà utilisé", content = @Content)
     })
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/me")
-    public ResponseEntity<MeResponse> updateCurrentUser(@AuthenticationPrincipal UserDetailsImpl authenticatedUser,
+    public ResponseEntity<MeUpdateResponse> updateCurrentUser(@AuthenticationPrincipal UserDetailsImpl authenticatedUser,
             @Valid @RequestBody UpdateMeRequest request) {
-        User user = this.authService.updateMe(authenticatedUser.getId(), request.email(), request.username());
-        return ResponseEntity.ok(this.meResponseMapper.toMeResponse(user));
+        UpdateMeResult result = this.authService.updateMe(authenticatedUser.getId(), request.email(), request.username());
+        MeResponse me = this.meResponseMapper.toMeResponse(result.user());
+        return ResponseEntity.ok(new MeUpdateResponse(me, result.token()));
     }
 
     @Operation(summary = "Change le mot de passe de l'utilisateur actuellement authentifié", description = "Cette opération permet à l'utilisateur authentifié de changer son mot de passe.")

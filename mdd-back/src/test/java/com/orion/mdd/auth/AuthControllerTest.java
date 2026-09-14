@@ -263,10 +263,11 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("renvoie 200 et le profil mis à jour quand le corps est valide")
-        void returnsUpdatedProfileWhenPayloadIsValid() throws Exception {
+        @DisplayName("renvoie 200, le profil mis à jour et un nouveau jeton quand le corps est valide")
+        void returnsUpdatedProfileAndNewTokenWhenPayloadIsValid() throws Exception {
             LocalDateTime createdAt = LocalDateTime.of(2026, 9, 1, 0, 0);
-            when(authService.updateMe(42L, "alice2@mdd.com", "alice2")).thenReturn(alice);
+            when(authService.updateMe(42L, "alice2@mdd.com", "alice2"))
+                    .thenReturn(new UpdateMeResult(alice, "jwt-token"));
             when(meResponseMapper.toMeResponse(alice))
                     .thenReturn(new MeResponse(42L, "alice2@mdd.com", "alice2", createdAt));
 
@@ -275,9 +276,10 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(asJson(validRequest())))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(42))
-                    .andExpect(jsonPath("$.email").value("alice2@mdd.com"))
-                    .andExpect(jsonPath("$.username").value("alice2"));
+                    .andExpect(jsonPath("$.user.id").value(42))
+                    .andExpect(jsonPath("$.user.email").value("alice2@mdd.com"))
+                    .andExpect(jsonPath("$.user.username").value("alice2"))
+                    .andExpect(jsonPath("$.token").value("jwt-token"));
 
             verify(authService).updateMe(42L, "alice2@mdd.com", "alice2");
         }
