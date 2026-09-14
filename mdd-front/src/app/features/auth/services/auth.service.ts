@@ -70,10 +70,12 @@ export class AuthService {
     updateProfile(username: string, email: string) {
         const request: MePutRequest = { username, email };
         // Le token précédent porte l'ancien username en sujet : il devient invalide
-        // si celui-ci change, l'API renvoie donc un nouveau token à stocker.
+        // si celui-ci change, l'API renvoie donc un nouveau token, accompagné de
+        // l'utilisateur à jour : inutile de rappeler /me pour le recharger.
         return this.http.put<MeUpdateResponse>(`${this.path}/me`, request).pipe(
             tap((response) => {
-                this._setToken(response.token);
+                this.tokenStore.set(response.token);
+                this.currentUser.set(response.user);
             })
         );
     }

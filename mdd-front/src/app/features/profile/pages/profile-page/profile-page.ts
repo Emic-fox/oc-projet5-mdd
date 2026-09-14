@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
 import { ProfileForm, ProfileFormData } from '@shared/components/forms/profile-form/profile-form';
 import { AuthService } from '@app/features/auth/services/auth.service';
 import { TopicsList } from '@/app/features/topics/components/topics-list/topics-list';
@@ -41,20 +40,12 @@ export class ProfilePage {
   }
 
   onProfileUpdate(data: ProfileFormData) {
-    const requests: Observable<unknown>[] = [];
-
     if (this.auth.user()?.username != data.username || this.auth.user()?.email != data.email) {
-      requests.push(this.auth.updateProfile(data.username, data.email));
+      this.auth.updateProfile(data.username, data.email).subscribe();
     }
 
     if (data.password) {
-      requests.push(this.auth.updatePassword(data.password));
+      this.auth.updatePassword(data.password).subscribe();
     }
-
-    if (requests.length === 0) {
-      return;
-    }
-
-    forkJoin(requests).subscribe(() => this.auth.refreshUser());
   }
 }

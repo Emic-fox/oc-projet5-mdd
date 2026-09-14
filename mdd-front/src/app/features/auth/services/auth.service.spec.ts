@@ -112,4 +112,42 @@ describe('AuthService', () => {
     expect(localStorage.getItem('token')).toBeNull();
     expect(service.getCurrentUser()).toBeNull();
   });
+
+  it('should reload the current user on demand via refreshUser', () => {
+    localStorage.setItem('token', 'jwt');
+    build();
+    httpMock.expectOne(url('/me')).flush(me);
+
+    service.refreshUser();
+
+    httpMock.expectOne(url('/me')).flush({ ...me, username: 'JaneDoe' });
+    expect(service.getCurrentUser()?.username).toBe('JaneDoe');
+  });
+
+  it('should update the profile and store the renewed token', () => {
+    service.login('JohnDoe', 'secret').subscribe();
+    httpMock.expectOne(url('/login')).flush({ token: 'jwt' });
+    httpMock.expectOne(url('/me')).flush(me);
+
+    service.updateProfile('JaneDoe', 'jane@doe.dev').subscribe();
+
+    const updateReq = httpMock.expectOne(url('/me'));
+    expect(updateReq.request.method).toBe('PUT');
+    expect(updateReq.request.body).toEqual({ username: 'JaneDoe', email: 'jane@doe.dev' });
+    updateReq.flush({ user: { ...me, username: 'JaneDoe', email: 'jane@doe.dev' }, token: 'new-jwt' });
+
+    expect(tokenStore.token()).toBe('new-jwt');
+    expect(service.getToken()).toBe('new-jwt');
+    expect(localStorage.getItem('token')).toBe('new-jwt');
+    expect(service.getCurrentUser()?.username).toBe('JaneDoe');
+  });
+
+  it('should update the password', () => {
+    service.updatePassword('NewPassword1!').subscribe();
+
+    const req = httpMock.expectOne(url('/me/password'));
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ newPassword: 'NewPassword1!' });
+    req.flush({});
+  });
 });
