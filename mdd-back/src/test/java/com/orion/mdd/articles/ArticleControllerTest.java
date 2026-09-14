@@ -90,6 +90,7 @@ class ArticleControllerTest {
         return new ArticleResponse(
             id,
             "Titre",
+            "Contenu",
             new ArticleResponse.TopicRef(1L, "Java"),
             new ArticleResponse.AuthorRef(42L, "alice"),
             LocalDateTime.of(2025, 1, 1, 12, 0)
@@ -107,6 +108,7 @@ class ArticleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].title").value("Titre"))
+                .andExpect(jsonPath("$[0].content").value("Contenu"))
                 .andExpect(jsonPath("$[0].topic.id").value(1))
                 .andExpect(jsonPath("$[0].topic.name").value("Java"))
                 .andExpect(jsonPath("$[0].author.id").value(42))
@@ -159,6 +161,7 @@ class ArticleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.title").value("Titre"))
+                .andExpect(jsonPath("$.content").value("Contenu"))
                 .andExpect(jsonPath("$.topic.id").value(1))
                 .andExpect(jsonPath("$.topic.name").value("Java"))
                 .andExpect(jsonPath("$.author.id").value(42))
@@ -199,6 +202,7 @@ class ArticleControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.title").value("Titre"))
+                .andExpect(jsonPath("$.content").value("Contenu"))
                 .andExpect(jsonPath("$.topic.id").value(1))
                 .andExpect(jsonPath("$.topic.name").value("Java"))
                 .andExpect(jsonPath("$.author.id").value(42))

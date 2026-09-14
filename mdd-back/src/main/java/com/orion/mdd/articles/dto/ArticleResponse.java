@@ -11,6 +11,9 @@ public record ArticleResponse(
     @Schema(description = "Titre de l'article", example = "Introduction à Spring Boot")
     String title,
 
+    @Schema(description = "Contenu de l'article", example = "Spring Boot est un framework...")
+    String content,
+
     TopicRef topic,
 
     AuthorRef author,
