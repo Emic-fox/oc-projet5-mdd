@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { ProfileForm } from '../../components/profile-form/profile-form';
+import { Component, computed, inject, signal } from '@angular/core';
+import { ProfileForm, ProfileFormData } from '@shared/components/forms/profile-form/profile-form';
+import { AuthService } from '@app/features/auth/services/auth.service';
 import { TopicsList } from '@/app/features/topics/components/topics-list/topics-list';
 import { Topic } from '@/app/features/topics/models/topic.interface';
 import { TopicsService } from '@/app/features/topics/services/topics.service';
@@ -7,11 +8,10 @@ import { TopicsService } from '@/app/features/topics/services/topics.service';
 @Component({
   imports: [ProfileForm, TopicsList],
   selector: 'app-profile-page',
-  styles: ``,
   template: `
   <section class="flex flex-col items-center gap-2">
     <h2 class="font-bold text-3xl">Profil utilisateur</h2>
-    <app-profile-form />
+    <app-profile-form [initialData]="initialData()" [passwordRequired]="false" submitLabel="Sauvegarder" (submitted)="onProfileUpdate($event)" />
   </section>
   <hr class="mx-12 my-4" />
   <section class="flex flex-col items-stretch gap-2">
@@ -21,8 +21,14 @@ import { TopicsService } from '@/app/features/topics/services/topics.service';
 `,
 })
 export class ProfilePage {
+  protected auth = inject(AuthService);
   private topicsService = inject(TopicsService);
-  
+
+  protected initialData = computed(() => ({
+    username: this.auth.user()?.username ?? '',
+    email: this.auth.user()?.email ?? '',
+  }));
+
   topics = signal<Topic[]>([]);
 
   ngOnInit() {
@@ -31,5 +37,10 @@ export class ProfilePage {
 
   onUnsubscribe(id: number) {
     this.topics.update(topics => topics.filter(topic => topic.id != id));
+  }
+
+  onProfileUpdate(data: ProfileFormData) {
+    // TODO appeler le service
+    console.log('onProfileUpdate', data);
   }
 }

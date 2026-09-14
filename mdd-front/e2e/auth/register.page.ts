@@ -3,7 +3,7 @@ import { type Locator, expect } from '@playwright/test';
 import { AuthFormPage } from './auth-form.page';
 
 export class RegisterPage extends AuthFormPage {
-  readonly submit: Locator = this.page.getByTestId('register-submit');
+  readonly submit: Locator = this.page.getByTestId('profile-submit');
   readonly submitButton: Locator = this.submit.locator('button');
 
   async goto() {

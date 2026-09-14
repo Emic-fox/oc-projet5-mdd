@@ -1,15 +1,15 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { RegisterForm, RegisterData } from "../../components/register-form/register-form";
+import { ProfileForm, ProfileFormData } from "@shared/components/forms/profile-form/profile-form";
 import { AuthService } from '../../services/auth.service';
 import { ApiError } from '@app/core/errors/api-error';
 
 @Component({
-  imports: [RegisterForm],
+  imports: [ProfileForm],
   selector: 'app-register-page',
   template: `
-  <app-register-form (submitted)="onRegister($event)" />
+  <app-profile-form submitLabel="S'inscrire" (submitted)="onRegister($event)" />
 
   @if (error()) {
     <p class="mt-4 text-center text-sm text-red-600" data-testid="api-error">{{ error() }}</p>
@@ -22,7 +22,7 @@ export class RegisterPage {
 
   protected error = signal<string | null>(null);
 
-  onRegister(data: RegisterData) {
+  onRegister(data: ProfileFormData) {
     this.error.set(null);
     this.auth
       .register(data.username, data.email, data.password)
