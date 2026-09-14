@@ -19,6 +19,11 @@ export const routes: Routes = [
     ] },
     { path: '', component: PrivateLayout, children: [
         {
+            path: 'articles',
+            loadComponent: () => import('./features/articles/pages/articles-feed-page/articles-feed-page').then(m => m.ArticlesFeedPage),
+            title: "Fil d'actualités"
+        },
+        {
             path: 'topics',
             loadComponent: () => import('./features/topics/pages/topics-page/topics-page').then(m => m.TopicsPage),
             title: "Thèmes"
