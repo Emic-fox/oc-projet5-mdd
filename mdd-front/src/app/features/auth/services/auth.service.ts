@@ -8,6 +8,9 @@ import { LoginRequest } from '../models/login-request.interface';
 import { RegisterRequest } from '../models/register-request.interface';
 import { TokenResponse } from '../models/token-response.interface';
 import { MeResponse } from '../models/me-response.interface';
+import { MeUpdateResponse } from '../models/me-update-response.interface';
+import { MePutRequest } from '../models/me-put-request.interface';
+import { MePutPasswordRequest } from '../models/me-put-password-request.interface';
 
 @Service()
 export class AuthService {
@@ -25,7 +28,7 @@ export class AuthService {
 
     constructor() {
         if (this.isConnected()) {
-            this._loadUser();
+            this.refreshUser();
         }
     }
 
@@ -40,7 +43,7 @@ export class AuthService {
     private _setToken(token: string | null) {
         this.tokenStore.set(token);
         if (token) {
-            this._loadUser();
+            this.refreshUser();
         } else {
             this.currentUser.set(null);
         }
@@ -64,11 +67,27 @@ export class AuthService {
         );
     }
 
+    updateProfile(username: string, email: string) {
+        const request: MePutRequest = { username, email };
+        // Le token précédent porte l'ancien username en sujet : il devient invalide
+        // si celui-ci change, l'API renvoie donc un nouveau token à stocker.
+        return this.http.put<MeUpdateResponse>(`${this.path}/me`, request).pipe(
+            tap((response) => {
+                this._setToken(response.token);
+            })
+        );
+    }
+
+    updatePassword(newPassword: string) {
+        const request: MePutPasswordRequest = { newPassword };
+        return this.http.put(`${this.path}/me/password`, request);
+    }
+
     logout() {
         this._setToken(null);
     }
 
-    private _loadUser() {
+    refreshUser() {
         if (!this.isConnected()) {
             return;
         }
