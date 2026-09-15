@@ -4,12 +4,15 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 import { apiErrorInterceptor } from './api-error.interceptor';
 import { ApiError } from './api-error';
+import { Logger } from '@app/core/services/logger.service';
 
 describe('apiErrorInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
+  let logger: Logger;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -20,6 +23,7 @@ describe('apiErrorInterceptor', () => {
     });
     http = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
+    logger = TestBed.inject(Logger);
   });
 
   afterEach(() => httpMock.verify());
@@ -35,6 +39,21 @@ describe('apiErrorInterceptor', () => {
     expect(caught).toBeInstanceOf(ApiError);
     expect((caught as ApiError).status).toBe(409);
     expect((caught as ApiError).message).toBe('Email pris');
+  });
+
+  it('logs the error exactly once via Logger', () => {
+    const errorSpy = vi.spyOn(logger, 'error');
+    http.get('/api/resource').subscribe({ error: () => {} });
+
+    httpMock
+      .expectOne('/api/resource')
+      .flush({ status: 409, detail: 'Email pris' }, { status: 409, statusText: 'Conflict' });
+
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/resource'),
+      expect.any(ApiError),
+    );
   });
 
   it('passes successful responses through untouched', () => {
