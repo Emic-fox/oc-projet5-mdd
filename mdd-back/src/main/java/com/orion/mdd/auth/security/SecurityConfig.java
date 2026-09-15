@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,8 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Câblage de la sécurité applicative : API stateless authentifiée par JWT.
@@ -43,7 +43,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationEntryPoint authenticationEntryPoint)
+            throws Exception {
         return http
                 // Stateless
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -57,7 +58,7 @@ public class SecurityConfig {
 
                 // Gestion de l'authentification
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedEntryPoint()))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
 
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
@@ -79,6 +80,12 @@ public class SecurityConfig {
         return source;
     }
 
+    /** Renvoie 401 au format ProblemDetail (et non la redirection login par défaut) quand l'authentification manque. */
+    @Bean
+    AuthenticationEntryPoint authenticationEntryPoint(ObjectMapper objectMapper) {
+        return new ProblemDetailAuthenticationEntryPoint(objectMapper);
+    }
+
     /** Encodeur de mots de passe */
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -89,10 +96,5 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
-    }
-
-    /** Renvoie 401 (et non la redirection login par défaut) quand l'authentification manque. */
-    private AuthenticationEntryPoint unauthorizedEntryPoint() {
-        return new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
     }
 }

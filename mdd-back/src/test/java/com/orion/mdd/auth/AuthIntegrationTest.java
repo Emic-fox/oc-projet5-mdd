@@ -3,6 +3,7 @@ package com.orion.mdd.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -182,10 +183,13 @@ class AuthIntegrationTest {
     class MeSecurity {
 
         @Test
-        @DisplayName("renvoie 401 sans en-tête Authorization")
+        @DisplayName("renvoie 401 sans en-tête Authorization, avec un corps ProblemDetail")
         void returns401WithoutToken() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.status").value(401))
+                    .andExpect(jsonPath("$.detail").isNotEmpty());
         }
 
         @Test
