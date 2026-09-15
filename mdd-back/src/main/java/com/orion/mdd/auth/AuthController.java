@@ -1,5 +1,6 @@
 package com.orion.mdd.auth;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -62,7 +63,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         String token = this.authService.register(registerRequest.email(), registerRequest.username(), registerRequest.password());
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token));
     }
 
     @Operation(summary = "Récupère les informations de l'utilisateur actuellement authentifié", description = "Cette opération permet de récupérer les informations de l'utilisateur actuellement authentifié en utilisant le token JWT fourni dans l'en-tête de la requête. Les informations retournées incluent l'identifiant, l'adresse e-mail, le nom d'utilisateur et la date de création du compte.")

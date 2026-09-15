@@ -147,14 +147,14 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("renvoie 200 et le token JWT quand le corps est valide")
+        @DisplayName("renvoie 201 et le token JWT quand le corps est valide")
         void returnsTokenWhenPayloadIsValid() throws Exception {
             when(authService.register("alice@mdd.com", "alice", "Secret123!")).thenReturn("jwt-token");
 
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(asJson(validRequest())))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.token").value("jwt-token"));
         }
 

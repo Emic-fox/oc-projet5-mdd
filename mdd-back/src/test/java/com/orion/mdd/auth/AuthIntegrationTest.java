@@ -67,7 +67,7 @@ class AuthIntegrationTest {
                         .content("""
                                 {"email":"%s","username":"%s","password":"%s"}
                                 """.formatted(email, username, password)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return JsonPath.read(body, "$.token");
     }
