@@ -13,4 +13,8 @@ export class ArticlesService {
   getArticles(request: GetArticlesRequest = {}) {
       return this.http.get<Article[]>(this.path, { params: { ...request } });
   }
+
+  getArticle(id: number) {
+      return this.http.get<Article>(`${this.path}/${id}`);
+  }
 }

@@ -67,4 +67,14 @@ describe('ArticlesService', () => {
     expect(req.request.params.get('sort')).toBe('asc');
     req.flush(articles);
   });
+
+  it('should request a single article by id', () => {
+    service.getArticle(1).subscribe((result) => {
+      expect(result).toEqual(articles[0]);
+    });
+
+    const req = httpMock.expectOne(`${url}/1`);
+    expect(req.request.method).toBe('GET');
+    req.flush(articles[0]);
+  });
 });

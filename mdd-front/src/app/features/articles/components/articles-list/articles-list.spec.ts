@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
 import { ArticlesList } from './articles-list';
 import { ArticleCard } from '../article-card/article-card';
 import { Article } from '../../models/article.interface';
@@ -30,6 +31,7 @@ describe('ArticlesList', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ArticlesList],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ArticlesList);

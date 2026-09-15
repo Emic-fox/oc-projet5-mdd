@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { formatDate } from '@angular/common';
 import { LOCALE_ID } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { ArticleCard } from './article-card';
 import { Article } from '../../models/article.interface';
 
@@ -26,6 +27,7 @@ describe('ArticleCard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ArticleCard],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ArticleCard);

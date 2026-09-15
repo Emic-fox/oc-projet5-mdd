@@ -14,6 +14,8 @@ export interface Article {
 export interface ArticlesApi {
   /** Stubbe `GET /api/articles` (quel que soit l'ordre de tri) avec la liste donnée. */
   mockArticles(articles: Article[]): Promise<void>;
+  /** Stubbe `GET /api/articles/{id}` avec l'article donné. */
+  mockArticle(article: Article): Promise<void>;
 }
 
 export const test = base.extend<{ articlesApi: ArticlesApi }>({
@@ -21,6 +23,9 @@ export const test = base.extend<{ articlesApi: ArticlesApi }>({
     await use({
       mockArticles: async (articles) => {
         await page.route('**/api/articles?sort=*', (route) => route.fulfill({ status: 200, json: articles }));
+      },
+      mockArticle: async (article) => {
+        await page.route(`**/api/articles/${article.id}`, (route) => route.fulfill({ status: 200, json: article }));
       },
     });
   },

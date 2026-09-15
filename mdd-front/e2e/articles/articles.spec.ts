@@ -101,3 +101,56 @@ test.describe('Fil d’articles', () => {
     await expect(articlesPage.createButton).toBeVisible();
   });
 });
+
+test.describe('Détail d’un article', () => {
+  test.beforeEach(async ({ authApi }) => {
+    await authApi.seedToken();
+    await authApi.mockMe({ username: 'JohnDoe' });
+  });
+
+  test('navigue vers le détail au clic sur une carte et affiche l’article complet', async ({
+    articlesApi,
+    articlesPage,
+    articleDetailPage,
+  }) => {
+    await articlesApi.mockArticles(articles);
+    await articlesApi.mockArticle(articles[0]);
+
+    await articlesPage.goto();
+    await articlesPage.expectLoaded();
+    await articlesPage.card('Article 1').click();
+
+    await articleDetailPage.expectLoaded('Article 1');
+    await expect(articleDetailPage.content).toHaveText('Contenu de l’article 1');
+    await expect(articleDetailPage.author).toHaveText('JohnDoe');
+    await expect(articleDetailPage.topic).toHaveText('Thème 1');
+  });
+
+  test('accède directement au détail d’un article via son URL', async ({ articlesApi, articleDetailPage }) => {
+    await articlesApi.mockArticle(articles[1]);
+
+    await articleDetailPage.goto(2);
+
+    await articleDetailPage.expectLoaded('Article 2');
+    await expect(articleDetailPage.content).toHaveText('Contenu de l’article 2');
+    await expect(articleDetailPage.author).toHaveText('JaneDoe');
+    await expect(articleDetailPage.topic).toHaveText('Thème 2');
+  });
+
+  test('revient au fil d’articles au clic sur le lien retour', async ({
+    articlesApi,
+    articlesPage,
+    articleDetailPage,
+  }) => {
+    await articlesApi.mockArticles(articles);
+    await articlesApi.mockArticle(articles[0]);
+
+    await articlesPage.goto();
+    await articlesPage.card('Article 1').click();
+    await articleDetailPage.expectLoaded('Article 1');
+
+    await articleDetailPage.backLink.click();
+
+    await articlesPage.expectLoaded();
+  });
+});

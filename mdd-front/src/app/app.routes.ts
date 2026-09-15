@@ -24,6 +24,11 @@ export const routes: Routes = [
             title: "Fil d'actualités"
         },
         {
+            path: 'articles/:id',
+            loadComponent: () => import('./features/articles/pages/article-detail-page/article-detail-page').then(m => m.ArticleDetailPage),
+            title: "Détail de l'article"
+        },
+        {
             path: 'topics',
             loadComponent: () => import('./features/topics/pages/topics-page/topics-page').then(m => m.TopicsPage),
             title: "Thèmes"
