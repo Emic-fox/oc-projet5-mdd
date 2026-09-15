@@ -1,5 +1,6 @@
 import { mergeTests, test as base } from '@playwright/test';
 
+import { test as articlesApiTest } from '../articles/articles-api.fixtures';
 import { test as coverageTest } from '../fixtures/coverage.fixtures';
 import { test as authApiTest } from './auth-api.fixtures';
 import { LoginPage } from './login.page';
@@ -26,6 +27,6 @@ const pomTest = base.extend<AuthPomFixtures>({
   },
 });
 
-export const test = mergeTests(coverageTest, pomTest, authApiTest);
+export const test = mergeTests(coverageTest, pomTest, authApiTest, articlesApiTest);
 
 export { expect } from '@playwright/test';

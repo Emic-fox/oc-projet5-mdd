@@ -16,7 +16,7 @@ export interface MockResponse {
 
 /** Helpers de stub des appels réseau des thèmes (`**\/api/topics*`). */
 export interface TopicsApi {
-  /** Stubbe `GET /api/topics?subscribed=false` avec la liste de thèmes donnée. */
+  /** Stubbe `GET /api/topics?subscribed=true|false` avec la liste de thèmes donnée. */
   mockTopics(topics: Topic[]): Promise<void>;
   /** Stubbe `POST /api/topics/:id/subscription`. */
   mockSubscribe(topicId: number, response?: MockResponse): Promise<void>;
@@ -28,7 +28,7 @@ export const test = base.extend<{ topicsApi: TopicsApi }>({
   topicsApi: async ({ page }, use) => {
     await use({
       mockTopics: async (topics) => {
-        await page.route('**/api/topics?subscribed=false', (route) => route.fulfill({ status: 200, json: topics }));
+        await page.route('**/api/topics?subscribed=*', (route) => route.fulfill({ status: 200, json: topics }));
       },
       mockSubscribe: async (topicId, { status, body = { topic: { id: topicId }, user: { id: 1 } } } = { status: 200 }) => {
         await page.route(`**/api/topics/${topicId}/subscription`, (route) => {

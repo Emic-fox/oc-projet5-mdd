@@ -1,3 +1,4 @@
+import { ArticlesPage } from '../articles/articles.page';
 import { expect, test } from './auth.fixtures';
 
 test.describe('Connexion', () => {
@@ -29,9 +30,10 @@ test.describe('Connexion', () => {
     await expect(loginPage.fieldErrors('login')).toHaveCount(0);
   });
 
-  test('connecte l’utilisateur en cas de succès', async ({ loginPage, authApi, page }) => {
+  test('connecte l’utilisateur en cas de succès', async ({ loginPage, authApi, articlesApi, page }) => {
     await authApi.mockLogin({ status: 200, body: { token: 'fake-jwt-token' } });
     await authApi.mockMe({ username: 'JohnDoe' });
+    await articlesApi.mockArticles([]);
 
     await loginPage.fill('JohnDoe', 'Password1!');
 
@@ -42,8 +44,7 @@ test.describe('Connexion', () => {
       login: 'JohnDoe',
       password: 'Password1!',
     });
-    await expect(page).toHaveURL('/');
-    await expect(page.getByTestId('welcome')).toContainText('Bienvenue JohnDoe');
+    await new ArticlesPage(page).expectLoaded();
     expect(await loginPage.token()).toBe('fake-jwt-token');
   });
 

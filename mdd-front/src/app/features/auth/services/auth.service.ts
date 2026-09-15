@@ -1,5 +1,6 @@
-import { computed, DestroyRef, inject, Service, signal } from '@angular/core';
+import { computed, DestroyRef, effect, inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
 import { TokenStore } from './token-store.service';
@@ -17,17 +18,30 @@ export class AuthService {
     private http = inject(HttpClient);
     private tokenStore = inject(TokenStore);
     private destroyRef = inject(DestroyRef);
+    private router = inject(Router);
 
     private path = `${environment.apiUrl}/api/auth`;
 
-    private isConnected = computed(() => !!this.tokenStore.token());
+    /** Présence d'un token (synchrone) : ne présume rien de la validité de la session côté API. */
+    readonly isAuthenticated = computed(() => !!this.tokenStore.token());
     private currentUser = signal<MeResponse | null>(null);
 
     /** Utilisateur authentifié courant (null si déconnecté ou pas encore chargé). */
     readonly user = this.currentUser.asReadonly();
 
     constructor() {
-        if (this.isConnected()) {
+        // Comportement à la déconnexion (exemple : token indiqué comme invalide par l'API)
+        let wasAuthenticated = this.isAuthenticated();
+        effect(() => {
+            const authenticated = this.isAuthenticated();
+            if (wasAuthenticated && !authenticated) {
+                this.currentUser.set(null);
+                this.router.navigate(['/']);
+            }
+            wasAuthenticated = authenticated;
+        });
+
+        if (this.isAuthenticated()) {
             this.refreshUser();
         }
     }
@@ -44,8 +58,6 @@ export class AuthService {
         this.tokenStore.set(token);
         if (token) {
             this.refreshUser();
-        } else {
-            this.currentUser.set(null);
         }
     }
 
@@ -90,7 +102,7 @@ export class AuthService {
     }
 
     refreshUser() {
-        if (!this.isConnected()) {
+        if (!this.isAuthenticated()) {
             return;
         }
 

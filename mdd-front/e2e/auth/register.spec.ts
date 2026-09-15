@@ -1,3 +1,4 @@
+import { ArticlesPage } from '../articles/articles.page';
 import { expect, test } from './auth.fixtures';
 
 test.describe('Inscription', () => {
@@ -26,9 +27,10 @@ test.describe('Inscription', () => {
     );
   });
 
-  test('inscrit l’utilisateur et le connecte en cas de succès', async ({ registerPage, authApi, page }) => {
+  test('inscrit l’utilisateur et le connecte en cas de succès', async ({ registerPage, authApi, articlesApi, page }) => {
     await authApi.mockRegister({ status: 201, body: { token: 'fake-jwt-token' } });
     await authApi.mockMe({ username: 'JohnDoe' });
+    await articlesApi.mockArticles([]);
 
     await registerPage.fill('JohnDoe', 'john.doe@example.com', 'Password1!');
 
@@ -40,8 +42,7 @@ test.describe('Inscription', () => {
       email: 'john.doe@example.com',
       password: 'Password1!',
     });
-    await expect(page).toHaveURL('/');
-    await expect(page.getByTestId('welcome')).toContainText('Bienvenue JohnDoe');
+    await new ArticlesPage(page).expectLoaded();
     expect(await registerPage.token()).toBe('fake-jwt-token');
   });
 

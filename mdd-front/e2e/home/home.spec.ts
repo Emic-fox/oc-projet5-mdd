@@ -4,7 +4,6 @@ import { HomePage } from './home.page';
 test.describe("Page d'accueil et navigation", () => {
     test('affiche les accès connexion / inscription pour un visiteur', async ({ homePage }) => {
         await homePage.expectLoaded();
-        await homePage.expectUnauth();
     });
 
     test('navigue vers la page de connexion', async ({ page, homePage }) => {

@@ -4,6 +4,7 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { TokenStore } from './token-store.service';
 import { environment } from '@/environments/environment';
@@ -16,13 +17,16 @@ describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
   let tokenStore: TokenStore;
+  let router: Router;
 
   const build = () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     tokenStore = TestBed.inject(TokenStore);
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
   };
@@ -45,6 +49,12 @@ describe('AuthService', () => {
     expect(service.getCurrentUser()).toBeNull();
   });
 
+  it('should not navigate on creation when there is no stored session to drop', () => {
+    TestBed.tick();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
   it('should load the current user on creation when a token is already stored', () => {
     localStorage.setItem('token', 'existing-jwt');
 
@@ -62,10 +72,12 @@ describe('AuthService', () => {
     httpMock
       .expectOne(url('/me'))
       .flush(null, { status: 401, statusText: 'Unauthorized' });
+    TestBed.tick();
 
     expect(service.getToken()).toBeNull();
     expect(localStorage.getItem('token')).toBeNull();
     expect(service.getCurrentUser()).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('should authenticate, persist the token and load the user on login', () => {
@@ -105,12 +117,28 @@ describe('AuthService', () => {
     service.login('JohnDoe', 'secret').subscribe();
     httpMock.expectOne(url('/login')).flush({ token: 'jwt' });
     httpMock.expectOne(url('/me')).flush(me);
+    TestBed.tick();
 
     service.logout();
+    TestBed.tick();
 
     expect(tokenStore.token()).toBeNull();
     expect(localStorage.getItem('token')).toBeNull();
     expect(service.getCurrentUser()).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('should clear the current user and navigate home when the token is invalidated externally (e.g. by the auth interceptor on a 401)', () => {
+    service.login('JohnDoe', 'secret').subscribe();
+    httpMock.expectOne(url('/login')).flush({ token: 'jwt' });
+    httpMock.expectOne(url('/me')).flush(me);
+    TestBed.tick();
+
+    tokenStore.set(null);
+    TestBed.tick();
+
+    expect(service.getCurrentUser()).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('should reload the current user on demand via refreshUser', () => {

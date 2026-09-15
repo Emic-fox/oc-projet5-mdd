@@ -4,6 +4,7 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { ProfilePage } from './profile-page';
 import { Topic } from '@/app/features/topics/models/topic.interface';
 import { environment } from '@/environments/environment';
@@ -25,7 +26,7 @@ describe('ProfilePage', () => {
   const setupTestBed = async () => {
     await TestBed.configureTestingModule({
       imports: [ProfilePage],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfilePage);

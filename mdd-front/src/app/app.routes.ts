@@ -2,10 +2,12 @@ import { Routes } from '@angular/router';
 import { HomePage } from './features/home/pages/home-page/home-page';
 import { PublicLayout } from './shared/layouts/public-layout/public-layout';
 import { PrivateLayout } from './shared/layouts/private-layout/private-layout';
+import { authGuard } from './features/auth/guards/auth.guard';
+import { guestGuard } from './features/auth/guards/guest.guard';
 
 export const routes: Routes = [
-    { path: '', component: HomePage },
-    { path: '', component: PublicLayout, children: [
+    { path: '', component: HomePage, canActivate: [guestGuard] },
+    { path: '', component: PublicLayout, canActivateChild: [guestGuard], children: [
         { 
             path: 'login',
             loadComponent: () => import('./features/auth/pages/login-page/login-page').then(m => m.LoginPage),
@@ -17,7 +19,7 @@ export const routes: Routes = [
             title: "Inscription"
         },
     ] },
-    { path: '', component: PrivateLayout, children: [
+    { path: '', component: PrivateLayout, canActivateChild: [authGuard], children: [
         {
             path: 'articles',
             loadComponent: () => import('./features/articles/pages/articles-feed-page/articles-feed-page').then(m => m.ArticlesFeedPage),
