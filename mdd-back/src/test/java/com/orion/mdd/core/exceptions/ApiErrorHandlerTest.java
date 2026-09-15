@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -31,20 +33,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
- * Tests unitaires de {@link ApiExceptionHandler} : traduction des {@link ApiException} en
+ * Tests unitaires de {@link ApiErrorHandler} : traduction des {@link ApiException} en
  * {@link ProblemDetail} (statut et message) et enrichissement des erreurs de validation.
  * Montés via un MockMvc standalone avec un contrôleur jetable.
  */
 @Tag("unit")
-@DisplayName("ApiExceptionHandler")
-class ApiExceptionHandlerTest {
+@DisplayName("ApiErrorHandler")
+class ApiErrorHandlerTest {
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
-                .setControllerAdvice(new ApiExceptionHandler())
+                .setControllerAdvice(new ApiErrorHandler())
                 .build();
     }
 
@@ -96,6 +98,11 @@ class ApiExceptionHandlerTest {
         String unannotated() {
             throw new UnannotatedException();
         }
+
+        @GetMapping("/unexpected")
+        String unexpected() {
+            throw new IllegalStateException("détail technique sensible");
+        }
     }
 
     @Nested
@@ -138,10 +145,32 @@ class ApiExceptionHandlerTest {
     }
 
     @Nested
+    @DisplayName("handleUnexpectedException")
+    class HandleUnexpectedException {
+
+        @Test
+        @DisplayName("répond 500 en ProblemDetail avec un message générique, sans exposer le message technique")
+        void returnsGenericProblemDetailForUnexpectedException() throws Exception {
+            mockMvc.perform(get("/unexpected"))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.status").value(500))
+                    .andExpect(jsonPath("$.detail").value(ApiErrorHandler.UNEXPECTED_ERROR_MESSAGE));
+        }
+
+        @Test
+        @DisplayName("les ApiException restent traitées par leur handler dédié")
+        void apiExceptionHandlerStillTakesPrecedence() throws Exception {
+            mockMvc.perform(get("/conflict-no-message"))
+                    .andExpect(status().isConflict());
+        }
+    }
+
+    @Nested
     @DisplayName("handleMethodArgumentNotValid")
     class HandleMethodArgumentNotValid {
 
-        private final ApiExceptionHandler handler = new ApiExceptionHandler();
+        private final ApiErrorHandler handler = new ApiErrorHandler();
 
         private MethodArgumentNotValidException exceptionWith(FieldError... fieldErrors) {
             BindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "body");

@@ -40,7 +40,7 @@ import com.orion.mdd.auth.exceptions.UsernameAlreadyUsedException;
 import com.orion.mdd.auth.security.JwtService;
 import com.orion.mdd.auth.security.SecurityConfig;
 import com.orion.mdd.auth.security.UserDetailsImpl;
-import com.orion.mdd.core.exceptions.ApiExceptionHandler;
+import com.orion.mdd.core.exceptions.ApiErrorHandler;
 import com.orion.mdd.users.User;
 
 import tools.jackson.databind.ObjectMapper;
@@ -48,7 +48,7 @@ import tools.jackson.databind.ObjectMapper;
 /**
  * Tests de la couche web de {@link AuthController} : routage, (dé)sérialisation JSON avec
  * l'{@code ObjectMapper} de Boot, validation des corps de requête, traduction des
- * {@code ApiException} par {@link ApiExceptionHandler} et vraie chaîne de filtres de sécurité
+ * {@code ApiException} par {@link ApiErrorHandler} et vraie chaîne de filtres de sécurité
  * (endpoints publics vs {@code /me} protégé).
  *
  * <p>Tranche {@code @WebMvcTest} : pas de service métier ni de base de données. {@code JwtService}

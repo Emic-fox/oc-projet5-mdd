@@ -19,13 +19,18 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
- * Traduit les {@link ApiException} en réponses HTTP au format {@link ProblemDetail} (RFC 7807).
- * Le statut HTTP provient du {@code @ResponseStatus} porté par la sous-classe.
+ * Point d'entrée unique de traduction des erreurs en réponses HTTP au format {@link ProblemDetail}
+ * (RFC 7807) : les {@link ApiException} métier (statut porté par leur {@code @ResponseStatus}),
+ * les erreurs de validation Spring ({@code @Valid}) et, en filet de sécurité, toute exception
+ * inattendue non couverte par les cas précédents.
  */
 @RestControllerAdvice
-public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+public class ApiErrorHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiErrorHandler.class);
+
+    /** Message renvoyé au client pour toute exception inattendue */
+    static final String UNEXPECTED_ERROR_MESSAGE = "Une erreur inattendue est survenue";
 
     /**
      * Construit la réponse d'erreur à partir de l'exception.
@@ -75,5 +80,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         body.setProperty("errors", errors);
 
         return super.handleExceptionInternal(ex, body, headers, status, request);
+    }
+
+    /**
+     * Filet de sécurité : toute exception ni {@link ApiException} ni prise en charge par
+     * {@link ResponseEntityExceptionHandler} (contrainte d'intégrité, NPE...) répond 500 au
+     * format {@link ProblemDetail}, avec un message générique constant. Les handlers plus
+     * spécifiques restent prioritaires.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleUnexpectedException(Exception ex, WebRequest request) {
+        log.error("Unexpected exception", ex);
+
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ProblemDetail body = super.createProblemDetail(ex, status, UNEXPECTED_ERROR_MESSAGE, null, null, request);
+
+        return super.handleExceptionInternal(ex, body, new HttpHeaders(), status, request);
     }
 }
