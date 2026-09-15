@@ -3,11 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Article } from '../models/article.interface';
 import { GetArticlesRequest } from '../models/get-articles-request.interface';
+import { CreateArticleRequest } from '../models/create-article-request.interface';
 
 @Service()
 export class ArticlesService {
   private http = inject(HttpClient);
-  
+
   private path = `${environment.apiUrl}/api/articles`;
 
   getArticles(request: GetArticlesRequest = {}) {
@@ -16,5 +17,9 @@ export class ArticlesService {
 
   getArticle(id: number) {
       return this.http.get<Article>(`${this.path}/${id}`);
+  }
+
+  createArticle(request: CreateArticleRequest) {
+      return this.http.post<Article>(this.path, request);
   }
 }

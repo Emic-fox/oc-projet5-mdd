@@ -154,3 +154,116 @@ test.describe('Détail d’un article', () => {
     await articlesPage.expectLoaded();
   });
 });
+
+test.describe('Création d’un article', () => {
+  const topics = [
+    { id: 1, name: 'Thème 1', description: 'Description du thème 1', subscribed: false },
+    { id: 2, name: 'Thème 2', description: 'Description du thème 2', subscribed: true },
+  ];
+
+  test.beforeEach(async ({ authApi, articlesApi }) => {
+    await authApi.seedToken();
+    await authApi.mockMe({ username: 'JohnDoe' });
+    await articlesApi.mockTopics(topics);
+  });
+
+  test('navigue vers la page de création au clic sur le bouton "Créer un article"', async ({
+    articlesApi,
+    articlesPage,
+    articleCreatePage,
+  }) => {
+    await articlesApi.mockArticles([]);
+    await articlesPage.goto();
+
+    await articlesPage.createButton.click();
+
+    await articleCreatePage.expectLoaded();
+  });
+
+  test('revient au fil d’articles au clic sur le lien retour', async ({ articlesPage, articleCreatePage }) => {
+    await articleCreatePage.goto();
+    await articleCreatePage.expectLoaded();
+
+    await articleCreatePage.backLink.click();
+
+    await articlesPage.expectLoaded();
+  });
+
+  test('propose les thèmes renvoyés par l’API dans la liste déroulante', async ({ articleCreatePage }) => {
+    await articleCreatePage.goto();
+
+    const options = articleCreatePage.input('topic').locator('option');
+    await expect(options.filter({ hasText: 'Thème 1' })).toHaveCount(1);
+    await expect(options.filter({ hasText: 'Thème 2' })).toHaveCount(1);
+  });
+
+  test('garde le bouton désactivé tant qu’un champ est vide', async ({ articleCreatePage }) => {
+    await articleCreatePage.goto();
+    await expect(articleCreatePage.submitButton).toBeDisabled();
+
+    await articleCreatePage.fill({ topic: 'Thème 1' });
+    await expect(articleCreatePage.submitButton).toBeDisabled();
+
+    await articleCreatePage.fill({ title: 'Mon article' });
+    await expect(articleCreatePage.submitButton).toBeDisabled();
+
+    await articleCreatePage.fill({ content: 'Le contenu de mon article' });
+    await expect(articleCreatePage.submitButton).toBeEnabled();
+  });
+
+  test('crée l’article et redirige vers son détail au clic sur "Créer"', async ({
+    articlesApi,
+    articleCreatePage,
+    articleDetailPage,
+    page,
+  }) => {
+    const created = {
+      id: 42,
+      title: 'Mon article',
+      content: 'Le contenu de mon article',
+      createdAt: '2026-09-15T00:00:00.000Z',
+      topic: { id: 1, name: 'Thème 1' },
+      author: { id: 1, username: 'JohnDoe' },
+    };
+    await articlesApi.mockCreateArticle({ status: 201, body: created });
+    await articlesApi.mockArticle(created);
+
+    await articleCreatePage.goto();
+    await articleCreatePage.fill({
+      topic: 'Thème 1',
+      title: 'Mon article',
+      content: 'Le contenu de mon article',
+    });
+
+    const request = page.waitForRequest('**/api/articles');
+    await articleCreatePage.submitButton.click();
+
+    expect((await request).postDataJSON()).toEqual({
+      topic_id: 1,
+      title: 'Mon article',
+      content: 'Le contenu de mon article',
+    });
+    await articleDetailPage.expectLoaded('Mon article');
+  });
+
+  test('affiche un message d’erreur en cas d’échec et reste sur la page', async ({
+    articlesApi,
+    articleCreatePage,
+  }) => {
+    await articlesApi.mockCreateArticle({
+      status: 500,
+      body: { type: 'about:blank', title: 'Internal Server Error', status: 500 },
+    });
+
+    await articleCreatePage.goto();
+    await articleCreatePage.fill({
+      topic: 'Thème 1',
+      title: 'Mon article',
+      content: 'Le contenu de mon article',
+    });
+    await articleCreatePage.submitButton.click();
+
+    await expect(articleCreatePage.pageError).toBeVisible();
+    await articleCreatePage.expectLoaded();
+  });
+});

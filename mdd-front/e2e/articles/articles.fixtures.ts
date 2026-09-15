@@ -5,10 +5,12 @@ import { test as coverageTest } from '../fixtures/coverage.fixtures';
 import { test as articlesApiTest } from './articles-api.fixtures';
 import { ArticlesPage } from './articles.page';
 import { ArticleDetailPage } from './article-detail.page';
+import { ArticleCreatePage } from './article-create.page';
 
 interface ArticlesPomFixtures {
   articlesPage: ArticlesPage;
   articleDetailPage: ArticleDetailPage;
+  articleCreatePage: ArticleCreatePage;
 }
 
 const pomTest = base.extend<ArticlesPomFixtures>({
@@ -17,6 +19,9 @@ const pomTest = base.extend<ArticlesPomFixtures>({
   },
   articleDetailPage: async ({ page }, use) => {
     await use(new ArticleDetailPage(page));
+  },
+  articleCreatePage: async ({ page }, use) => {
+    await use(new ArticleCreatePage(page));
   },
 });
 

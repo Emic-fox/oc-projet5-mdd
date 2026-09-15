@@ -29,6 +29,11 @@ export const routes: Routes = [
             title: "Détail de l'article"
         },
         {
+            path: 'new-article',
+            loadComponent: () => import('./features/articles/pages/article-create-page/article-create-page').then(m => m.ArticleCreatePage),
+            title: "Créer un article"
+        },
+        {
             path: 'topics',
             loadComponent: () => import('./features/topics/pages/topics-page/topics-page').then(m => m.TopicsPage),
             title: "Thèmes"

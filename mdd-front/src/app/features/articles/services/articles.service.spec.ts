@@ -77,4 +77,17 @@ describe('ArticlesService', () => {
     expect(req.request.method).toBe('GET');
     req.flush(articles[0]);
   });
+
+  it('should post a new article', () => {
+    const request = { topic_id: 1, title: 'Article 1', content: 'Contenu 1' };
+
+    service.createArticle(request).subscribe((result) => {
+      expect(result).toEqual(articles[0]);
+    });
+
+    const req = httpMock.expectOne(url);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(request);
+    req.flush(articles[0]);
+  });
 });
