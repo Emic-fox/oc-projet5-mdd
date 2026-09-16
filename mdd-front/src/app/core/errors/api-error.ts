@@ -14,7 +14,6 @@ export class ApiError extends Error {
     constructor(
         readonly status: number,
         message: string,
-        readonly fieldErrors: Record<string, string> = {},
         readonly problem: ProblemDetail | null = null,
     ) {
         super(message);
@@ -23,9 +22,9 @@ export class ApiError extends Error {
 
     static from(err: HttpErrorResponse): ApiError {
         const problem = (err.error as ProblemDetail | null) ?? null;
-        const message =
+        const baseMessage =
             err.status === 0 ? NETWORK_MESSAGE : problem?.detail || DEFAULT_MESSAGE;
-        return new ApiError(err.status, message, extractFieldErrors(problem), problem);
+        return new ApiError(err.status, withFieldDetails(baseMessage, problem), problem);
     }
 
     /** Message à afficher : `message` par défaut, sauf surcharge pour ce code HTTP. */
@@ -34,11 +33,10 @@ export class ApiError extends Error {
     }
 }
 
-/** Erreurs de validation par champ (RFC 7807 étendu). */
-function extractFieldErrors(problem: ProblemDetail | null): Record<string, string> {
-    const result: Record<string, string> = {};
-    for (const { field, message } of problem?.errors ?? []) {
-        result[field] ??= message;
-    }
-    return result;
+/** Complète le message avec le détail des champs en erreur (RFC 7807 étendu). */
+function withFieldDetails(message: string, problem: ProblemDetail | null): string {
+    const errors = problem?.errors ?? [];
+    if (errors.length === 0) return message;
+    const details = errors.map(({ field, message }) => `${field} : ${message}`).join(', ');
+    return `${message} (${details})`;
 }

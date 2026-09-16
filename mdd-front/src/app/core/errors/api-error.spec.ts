@@ -27,18 +27,19 @@ describe('ApiError', () => {
     );
   });
 
-  it('maps field errors, first message per field wins', () => {
+  it('appends field error details to the message', () => {
     const err = from({
       status: 400,
       error: {
         status: 400,
+        detail: 'Requête invalide',
         errors: [
           { field: 'email', message: 'invalide' },
-          { field: 'email', message: 'requis' },
+          { field: 'password', message: 'requis' },
         ],
       },
     });
-    expect(err.fieldErrors).toEqual({ email: 'invalide' });
+    expect(err.message).toBe('Requête invalide (email : invalide, password : requis)');
   });
 
   describe('messageFor', () => {
