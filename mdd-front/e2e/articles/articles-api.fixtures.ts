@@ -11,7 +11,15 @@ export interface Article {
   author: { id: number; username: string };
 }
 
-/** Réponse simulée d'un endpoint (création d'article). */
+/** Commentaire tel que renvoyé par l'API. */
+export interface Comment {
+  id: number;
+  content: string;
+  createdAt: string;
+  author: { id: number; username: string };
+}
+
+/** Réponse simulée d'un endpoint (création d'article/commentaire). */
 export interface MockResponse {
   status: number;
   body?: unknown;
@@ -27,6 +35,10 @@ export interface ArticlesApi {
   mockTopics(topics: Topic[]): Promise<void>;
   /** Stubbe `POST /api/articles`. */
   mockCreateArticle(response: MockResponse): Promise<void>;
+  /** Stubbe `GET /api/articles/{id}/comments` avec les commentaires donnés. */
+  mockComments(articleId: number, comments: Comment[]): Promise<void>;
+  /** Stubbe `POST /api/articles/{id}/comments`. */
+  mockCreateComment(articleId: number, response: MockResponse): Promise<void>;
 }
 
 export const test = base.extend<{ articlesApi: ArticlesApi }>({
@@ -46,6 +58,18 @@ export const test = base.extend<{ articlesApi: ArticlesApi }>({
       },
       mockCreateArticle: async ({ status, body = {} }) => {
         await page.route('**/api/articles', (route) => {
+          if (route.request().method() !== 'POST') return route.fallback();
+          return route.fulfill({ status, json: body });
+        });
+      },
+      mockComments: async (articleId, comments) => {
+        await page.route(`**/api/articles/${articleId}/comments`, (route) => {
+          if (route.request().method() !== 'GET') return route.fallback();
+          return route.fulfill({ status: 200, json: comments });
+        });
+      },
+      mockCreateComment: async (articleId, { status, body = {} }) => {
+        await page.route(`**/api/articles/${articleId}/comments`, (route) => {
           if (route.request().method() !== 'POST') return route.fallback();
           return route.fulfill({ status, json: body });
         });

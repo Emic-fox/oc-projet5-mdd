@@ -8,9 +8,11 @@ import {
 import { of } from 'rxjs';
 import { ArticleDetailPage } from './article-detail-page';
 import { Article } from '../../models/article.interface';
+import { Comment } from '../../models/comment.interface';
 import { environment } from '@/environments/environment';
 
 const path = `${environment.apiUrl}/api/articles`;
+const commentsPath = `${path}/1/comments`;
 
 describe('ArticleDetailPage', () => {
   let component: ArticleDetailPage;
@@ -25,6 +27,15 @@ describe('ArticleDetailPage', () => {
     topic: { id: 1, name: 'Thème 1' },
     author: { id: 1, username: 'JohnDoe' },
   };
+
+  const comments: Comment[] = [
+    {
+      id: 1,
+      content: 'Super article !',
+      createdAt: new Date('2026-09-15'),
+      author: { id: 2, username: 'JaneDoe' },
+    },
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -52,6 +63,7 @@ describe('ArticleDetailPage', () => {
   it('should create', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${path}/1`).flush(article);
+    httpMock.expectOne(commentsPath).flush(comments);
 
     expect(component).toBeTruthy();
   });
@@ -62,11 +74,13 @@ describe('ArticleDetailPage', () => {
     const req = httpMock.expectOne(`${path}/1`);
     expect(req.request.method).toBe('GET');
     req.flush(article);
+    httpMock.expectOne(commentsPath).flush(comments);
   });
 
   it('should render the article title, content, author and topic', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${path}/1`).flush(article);
+    httpMock.expectOne(commentsPath).flush(comments);
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
@@ -74,5 +88,46 @@ describe('ArticleDetailPage', () => {
     expect(text).toContain('Le contenu de mon article');
     expect(text).toContain('JohnDoe');
     expect(text).toContain('Thème 1');
+  });
+
+  it('should request the comments matching the route id and render them', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}/1`).flush(article);
+
+    const req = httpMock.expectOne(commentsPath);
+    expect(req.request.method).toBe('GET');
+    req.flush(comments);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Super article !');
+    expect(text).toContain('JaneDoe');
+  });
+
+  it('should post a new comment and append it to the list', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}/1`).flush(article);
+    httpMock.expectOne(commentsPath).flush(comments);
+    fixture.detectChanges();
+
+    const newComment: Comment = {
+      id: 2,
+      content: 'Merci !',
+      createdAt: new Date('2026-09-16'),
+      author: { id: 3, username: 'BobDoe' },
+    };
+
+    component.onCommentSubmitted('Merci !');
+
+    const req = httpMock.expectOne(commentsPath);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ content: 'Merci !' });
+    req.flush(newComment);
+    fixture.detectChanges();
+
+    expect(component.comments()).toEqual([...comments, newComment]);
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Merci !');
+    expect(text).toContain('BobDoe');
   });
 });

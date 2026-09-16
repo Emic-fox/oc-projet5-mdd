@@ -115,6 +115,7 @@ test.describe('Détail d’un article', () => {
   }) => {
     await articlesApi.mockArticles(articles);
     await articlesApi.mockArticle(articles[0]);
+    await articlesApi.mockComments(1, []);
 
     await articlesPage.goto();
     await articlesPage.expectLoaded();
@@ -128,6 +129,7 @@ test.describe('Détail d’un article', () => {
 
   test('accède directement au détail d’un article via son URL', async ({ articlesApi, articleDetailPage }) => {
     await articlesApi.mockArticle(articles[1]);
+    await articlesApi.mockComments(2, []);
 
     await articleDetailPage.goto(2);
 
@@ -144,6 +146,7 @@ test.describe('Détail d’un article', () => {
   }) => {
     await articlesApi.mockArticles(articles);
     await articlesApi.mockArticle(articles[0]);
+    await articlesApi.mockComments(1, []);
 
     await articlesPage.goto();
     await articlesPage.card('Article 1').click();
@@ -152,6 +155,51 @@ test.describe('Détail d’un article', () => {
     await articleDetailPage.backLink.click();
 
     await articlesPage.expectLoaded();
+  });
+
+  test('affiche les commentaires existants de l’article', async ({ articlesApi, articleDetailPage }) => {
+    await articlesApi.mockArticle(articles[0]);
+    await articlesApi.mockComments(1, [
+      {
+        id: 1,
+        content: 'Super article !',
+        createdAt: '2026-09-15T00:00:00.000Z',
+        author: { id: 2, username: 'JaneDoe' },
+      },
+    ]);
+
+    await articleDetailPage.goto(1);
+    await articleDetailPage.expectLoaded('Article 1');
+
+    await expect(articleDetailPage.comments).toHaveCount(1);
+    await expect(articleDetailPage.comments.first()).toContainText('Super article !');
+    await expect(articleDetailPage.comments.first()).toContainText('JaneDoe');
+  });
+
+  test('poste un nouveau commentaire et l’ajoute à la liste', async ({ page, articlesApi, articleDetailPage }) => {
+    await articlesApi.mockArticle(articles[0]);
+    await articlesApi.mockComments(1, []);
+    await articlesApi.mockCreateComment(1, {
+      status: 201,
+      body: {
+        id: 2,
+        content: 'Merci pour cet article !',
+        createdAt: '2026-09-16T00:00:00.000Z',
+        author: { id: 1, username: 'JohnDoe' },
+      },
+    });
+
+    await articleDetailPage.goto(1);
+    await articleDetailPage.expectLoaded('Article 1');
+
+    const request = page.waitForRequest('**/api/articles/1/comments');
+    await articleDetailPage.submitComment('Merci pour cet article !');
+
+    expect((await request).postDataJSON()).toEqual({ content: 'Merci pour cet article !' });
+    await expect(articleDetailPage.comments).toHaveCount(1);
+    await expect(articleDetailPage.comments.first()).toContainText('Merci pour cet article !');
+    await expect(articleDetailPage.comments.first()).toContainText('JohnDoe');
+    await expect(articleDetailPage.commentInput).toHaveValue('');
   });
 });
 
@@ -227,6 +275,7 @@ test.describe('Création d’un article', () => {
     };
     await articlesApi.mockCreateArticle({ status: 201, body: created });
     await articlesApi.mockArticle(created);
+    await articlesApi.mockComments(created.id, []);
 
     await articleCreatePage.goto();
     await articleCreatePage.fill({
