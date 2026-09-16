@@ -5,12 +5,14 @@ export class TopicsPage {
   readonly menuToggle: Locator;
   readonly mobileMenu: Locator;
   readonly menuBackdrop: Locator;
+  readonly toast: Locator;
 
   constructor(private readonly page: Page) {
     this.cards = this.page.locator('app-topic-card');
     this.menuToggle = this.page.getByTestId('menu-toggle');
     this.mobileMenu = this.page.getByTestId('mobile-menu');
     this.menuBackdrop = this.page.getByTestId('menu-backdrop');
+    this.toast = this.page.getByTestId('toast');
   }
 
   async goto() {
@@ -31,5 +33,10 @@ export class TopicsPage {
   /** Retourne le bouton d'abonnement/désabonnement de la carte portant ce nom. */
   subscribeButton(name: string): Locator {
     return this.card(name).getByRole('button');
+  }
+
+  /** Retourne le bouton de fermeture du toast affiché. */
+  toastCloseButton(): Locator {
+    return this.toast.getByRole('button');
   }
 }

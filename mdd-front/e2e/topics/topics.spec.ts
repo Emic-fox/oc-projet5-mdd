@@ -83,6 +83,37 @@ test.describe('Liste des thèmes', () => {
   });
 });
 
+test.describe('Notifications', () => {
+  test.beforeEach(async ({ authApi }) => {
+    await authApi.seedToken();
+    await authApi.mockMe({ username: 'JohnDoe' });
+  });
+
+  test('affiche un toast d’erreur quand l’abonnement échoue', async ({ topicsApi, topicsPage }) => {
+    await topicsApi.mockTopics(topics);
+    await topicsApi.mockSubscribe(1, { status: 500 });
+
+    await topicsPage.goto();
+    await topicsPage.subscribeButton('Thème 1').click();
+
+    await expect(topicsPage.toast).toBeVisible();
+    await expect(topicsPage.toast).toContainText('Une erreur est survenue. Veuillez réessayer.');
+  });
+
+  test('ferme le toast au clic sur le bouton de fermeture', async ({ topicsApi, topicsPage }) => {
+    await topicsApi.mockTopics(topics);
+    await topicsApi.mockSubscribe(1, { status: 500 });
+
+    await topicsPage.goto();
+    await topicsPage.subscribeButton('Thème 1').click();
+    await expect(topicsPage.toast).toBeVisible();
+
+    await topicsPage.toastCloseButton().click();
+
+    await expect(topicsPage.toast).not.toBeVisible();
+  });
+});
+
 test.describe('Menu mobile', () => {
   test.use({ viewport: { width: 375, height: 667 } });
 

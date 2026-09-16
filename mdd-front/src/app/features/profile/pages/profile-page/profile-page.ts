@@ -4,6 +4,7 @@ import { AuthService } from '@app/features/auth/services/auth.service';
 import { TopicsList } from '@/app/features/topics/components/topics-list/topics-list';
 import { Topic } from '@/app/features/topics/models/topic.interface';
 import { TopicsService } from '@/app/features/topics/services/topics.service';
+import { Notifier } from '@app/core/services/notifier.service';
 
 @Component({
   imports: [ProfileForm, TopicsList],
@@ -23,6 +24,7 @@ import { TopicsService } from '@/app/features/topics/services/topics.service';
 export class ProfilePage {
   protected auth = inject(AuthService);
   private topicsService = inject(TopicsService);
+  private notifier = inject(Notifier);
 
   protected initialData = computed(() => ({
     username: this.auth.user()?.username ?? '',
@@ -41,11 +43,15 @@ export class ProfilePage {
 
   onProfileUpdate(data: ProfileFormData) {
     if (this.auth.user()?.username != data.username || this.auth.user()?.email != data.email) {
-      this.auth.updateProfile(data.username, data.email).subscribe();
+      this.auth.updateProfile(data.username, data.email).subscribe({
+        next: () => this.notifier.success('Profil mis à jour.'),
+      });
     }
 
     if (data.password) {
-      this.auth.updatePassword(data.password).subscribe();
+      this.auth.updatePassword(data.password).subscribe({
+        next: () => this.notifier.success('Mot de passe mis à jour.'),
+      });
     }
   }
 }

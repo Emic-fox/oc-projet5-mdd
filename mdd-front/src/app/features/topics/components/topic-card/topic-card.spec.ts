@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { apiErrorInterceptor } from '@app/core/errors/api-error.interceptor';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -8,11 +9,13 @@ import {
 import { TopicCard } from './topic-card';
 import { Topic } from '../../models/topic.interface';
 import { environment } from '@/environments/environment';
+import { Notifier } from '@app/core/services/notifier.service';
 
 describe('TopicCard', () => {
   let component: TopicCard;
   let fixture: ComponentFixture<TopicCard>;
   let httpMock: HttpTestingController;
+  let notifier: Notifier;
 
   const topic: Topic = {
     id: 1,
@@ -32,12 +35,16 @@ describe('TopicCard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TopicCard],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(withInterceptors([apiErrorInterceptor])),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TopicCard);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+    notifier = TestBed.inject(Notifier);
     fixture.componentRef.setInput('topic', topic);
     await fixture.whenStable();
   });
@@ -76,6 +83,21 @@ describe('TopicCard', () => {
       httpMock.expectOne(`${environment.apiUrl}/api/topics/1/subscription`).flush({});
 
       expect(subscribeSpy).toHaveBeenCalledWith(1);
+    });
+
+    it('should notify an error and not emit when the subscription fails', () => {
+      setTopic({ subscribed: false });
+      const subscribeSpy = vi.fn();
+      const notifierSpy = vi.spyOn(notifier, 'error');
+      component.subscribe.subscribe(subscribeSpy);
+
+      getButton().click();
+      httpMock
+        .expectOne(`${environment.apiUrl}/api/topics/1/subscription`)
+        .flush({ detail: 'Erreur' }, { status: 500, statusText: 'Server Error' });
+
+      expect(subscribeSpy).not.toHaveBeenCalled();
+      expect(notifierSpy).toHaveBeenCalledWith('Erreur');
     });
   });
 

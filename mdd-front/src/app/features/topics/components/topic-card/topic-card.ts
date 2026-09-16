@@ -4,6 +4,8 @@ import { Button } from '@/app/shared/components/button/button';
 import { Card } from '@/app/shared/components/card/card';
 import { TopicsService } from '../../services/topics.service';
 import { tap } from 'rxjs';
+import { ApiError } from '@app/core/errors/api-error';
+import { Notifier } from '@app/core/services/notifier.service';
 
 @Component({
   imports: [Button, Card],
@@ -26,6 +28,7 @@ export class TopicCard {
   unsubscribe = output<number>();
 
   topicsService = inject(TopicsService);
+  private notifier = inject(Notifier);
 
   subscribeButtonLabel = computed<string>(() => {
     if (this.topic().subscribed) {
@@ -45,11 +48,11 @@ export class TopicCard {
     if (this.topic().subscribed) {
       this.topicsService.unsubscribe(id).pipe(
         tap(() => this.unsubscribe.emit(id))
-      ).subscribe();
+      ).subscribe({ error: (err: ApiError) => this.notifier.error(err.message) });
     } else {
       this.topicsService.subscribe(id).pipe(
         tap(() => this.subscribe.emit(id))
-      ).subscribe();
+      ).subscribe({ error: (err: ApiError) => this.notifier.error(err.message) });
     }
   }
 }

@@ -8,6 +8,7 @@ import { provideRouter } from '@angular/router';
 import { ProfilePage } from './profile-page';
 import { Topic } from '@/app/features/topics/models/topic.interface';
 import { environment } from '@/environments/environment';
+import { Notifier } from '@app/core/services/notifier.service';
 
 const topicsUrl = `${environment.apiUrl}/api/topics?subscribed=true`;
 const meUrl = `${environment.apiUrl}/api/auth/me`;
@@ -22,6 +23,7 @@ describe('ProfilePage', () => {
   let component: ProfilePage;
   let fixture: ComponentFixture<ProfilePage>;
   let httpMock: HttpTestingController;
+  let notifier: Notifier;
 
   const setupTestBed = async () => {
     await TestBed.configureTestingModule({
@@ -32,6 +34,7 @@ describe('ProfilePage', () => {
     fixture = TestBed.createComponent(ProfilePage);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+    notifier = TestBed.inject(Notifier);
   };
 
   beforeEach(() => {
@@ -69,6 +72,7 @@ describe('ProfilePage', () => {
     });
 
     it('should update the profile when the username or the email changed', () => {
+      const notifierSpy = vi.spyOn(notifier, 'success');
       component.onProfileUpdate({ username: 'JaneDoe', email: 'john@doe.dev', password: '' });
 
       const updateReq = httpMock.expectOne(meUrl);
@@ -77,9 +81,11 @@ describe('ProfilePage', () => {
       updateReq.flush({ user: { ...me, username: 'JaneDoe' }, token: 'new-jwt' });
 
       httpMock.expectNone(passwordUrl);
+      expect(notifierSpy).toHaveBeenCalledWith('Profil mis à jour.');
     });
 
     it('should update the password when one is provided', () => {
+      const notifierSpy = vi.spyOn(notifier, 'success');
       component.onProfileUpdate({ username: 'JohnDoe', email: 'john@doe.dev', password: 'NewPassword1!' });
 
       const passwordReq = httpMock.expectOne(passwordUrl);
@@ -88,6 +94,7 @@ describe('ProfilePage', () => {
       passwordReq.flush({});
 
       httpMock.expectNone(meUrl);
+      expect(notifierSpy).toHaveBeenCalledWith('Mot de passe mis à jour.');
     });
 
     it('should update the profile and the password together', () => {
