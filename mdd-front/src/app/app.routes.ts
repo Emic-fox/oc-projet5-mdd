@@ -46,5 +46,9 @@ export const routes: Routes = [
             title: "Profil"
         }
     ] },
-    { path: '**', redirectTo: '' }
+    {
+        path: '**',
+        loadComponent: () => import('./features/not-found/pages/not-found-page/not-found-page').then(m => m.NotFoundPage),
+        title: 'Page introuvable'
+    }
 ];
