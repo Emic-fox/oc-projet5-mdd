@@ -1,8 +1,9 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { Button } from "@shared/components/button/button";
 import { InputText } from "@shared/components/forms/input-text/input-text";
 import { InputPassword } from "@shared/components/forms/input-password/input-password";
+import { ErrorsContainer } from '@shared/components/errors-container/errors-container';
 
 export interface LoginData {
   login: string;
@@ -10,7 +11,7 @@ export interface LoginData {
 }
 
 @Component({
-  imports: [Button, FormField, InputText, InputPassword],
+  imports: [Button, FormField, InputText, InputPassword, ErrorsContainer],
   selector: 'app-login-form',
   styles: ``,
   template: `
@@ -20,9 +21,13 @@ export interface LoginData {
     <app-input-password [formField]="loginForm.password" autocomplete="current-password" data-testid="password" />
 
     <app-button type="submit" data-testid="login-submit" [disabled]="loginForm().invalid()">Se connecter</app-button>
+
+    <app-errors-container [message]="globalError()" />
   </form>`,
 })
 export class LoginForm {
+  globalError = input<string | null>(null);
+
   submitted = output<LoginData>();
 
   loginModel = signal<LoginData>({

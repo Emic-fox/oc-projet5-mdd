@@ -18,7 +18,7 @@ export abstract class AuthFormPage {
 
   /** Message d'erreur au niveau de la page (retour API). */
   get pageError(): Locator {
-    return this.page.getByTestId('api-error');
+    return this.page.getByTestId('content-error');
   }
 
   /** Renseigne un champ puis déclenche son `blur` (validation « touché »). */

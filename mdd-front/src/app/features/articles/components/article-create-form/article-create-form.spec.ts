@@ -110,4 +110,17 @@ describe('ArticleCreateForm', () => {
     await fixture.whenStable();
     expect(emitted).toEqual([]);
   });
+
+  it('should render the global error when set', () => {
+    fixture.componentRef.setInput('globalError', "Échec de la création de l'article.");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain("Échec de la création de l'article.");
+  });
+
+  it('should render nothing when there is no global error', () => {
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="content-error"]'),
+    ).toBeNull();
+  });
 });

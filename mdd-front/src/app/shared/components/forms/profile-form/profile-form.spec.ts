@@ -163,6 +163,19 @@ describe('ProfileForm', () => {
     expect(emitted).toEqual([]);
   });
 
+  it('should render the global error when set', () => {
+    fixture.componentRef.setInput('globalError', 'Échec de la sauvegarde.');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Échec de la sauvegarde.');
+  });
+
+  it('should render nothing when there is no global error', () => {
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="content-error"]'),
+    ).toBeNull();
+  });
+
   describe('with an optional password (profile editing)', () => {
     beforeEach(async () => {
       fixture.componentRef.setInput('passwordRequired', false);

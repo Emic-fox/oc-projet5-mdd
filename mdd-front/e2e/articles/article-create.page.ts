@@ -10,7 +10,7 @@ export class ArticleCreatePage {
     this.backLink = this.page.getByTestId('back-link');
     this.submit = this.page.getByTestId('create-submit');
     this.submitButton = this.submit.locator('button');
-    this.pageError = this.page.getByTestId('api-error');
+    this.pageError = this.page.getByTestId('content-error');
   }
 
   async goto() {

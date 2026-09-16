@@ -9,11 +9,7 @@ import { ApiError } from '@app/core/errors/api-error';
   imports: [ProfileForm],
   selector: 'app-register-page',
   template: `
-  <app-profile-form submitLabel="S'inscrire" (submitted)="onRegister($event)" />
-
-  @if (error()) {
-    <p class="mt-4 text-center text-sm text-red-600" data-testid="api-error">{{ error() }}</p>
-  }`,
+  <app-profile-form submitLabel="S'inscrire" [globalError]="error()" (submitted)="onRegister($event)" />`,
 })
 export class RegisterPage {
   private auth = inject(AuthService);

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -10,6 +10,7 @@ import { ArticleDetailPage } from './article-detail-page';
 import { Article } from '../../models/article.interface';
 import { Comment } from '../../models/comment.interface';
 import { environment } from '@/environments/environment';
+import { apiErrorInterceptor } from '@app/core/errors/api-error.interceptor';
 
 const path = `${environment.apiUrl}/api/articles`;
 const commentsPath = `${path}/1/comments`;
@@ -42,7 +43,7 @@ describe('ArticleDetailPage', () => {
       imports: [ArticleDetailPage],
       providers: [
         provideRouter([]),
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([apiErrorInterceptor])),
         provideHttpClientTesting(),
         {
           provide: ActivatedRoute,
@@ -129,5 +130,33 @@ describe('ArticleDetailPage', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Merci !');
     expect(text).toContain('BobDoe');
+  });
+
+  it('should display a dedicated message when the article does not exist', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}/1`).flush('Not found', { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(commentsPath).flush(comments);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Article introuvable.');
+  });
+
+  it('should display an error when loading the article fails for another reason', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}/1`).flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    httpMock.expectOne(commentsPath).flush(comments);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
+  });
+
+  it('should display an error and an empty list when loading the comments fails', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}/1`).flush(article);
+    httpMock.expectOne(commentsPath).flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
+    expect(component.comments()).toEqual([]);
   });
 });

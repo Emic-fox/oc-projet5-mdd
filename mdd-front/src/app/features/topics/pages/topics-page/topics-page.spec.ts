@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -9,6 +9,7 @@ import { TopicsPage } from './topics-page';
 import { TopicsList } from '../../components/topics-list/topics-list';
 import { Topic } from '../../models/topic.interface';
 import { environment } from '@/environments/environment';
+import { apiErrorInterceptor } from '@app/core/errors/api-error.interceptor';
 
 const url = `${environment.apiUrl}/api/topics?subscribed=false`;
 
@@ -25,7 +26,10 @@ describe('TopicsPage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TopicsPage],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(withInterceptors([apiErrorInterceptor])),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TopicsPage);
@@ -141,5 +145,15 @@ describe('TopicsPage', () => {
 
     expect(button.textContent?.trim()).toBe('Déjà abonné');
     expect(button.disabled).toBe(true);
+  });
+
+  it('should display an error and an empty list when loading the topics fails', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(url).flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
+    const topicsList = fixture.debugElement.query(By.css('app-topics-list'));
+    expect((topicsList.componentInstance as TopicsList).topics()).toEqual([]);
   });
 });

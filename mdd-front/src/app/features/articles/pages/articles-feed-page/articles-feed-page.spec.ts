@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -11,6 +11,7 @@ import { ArticlesList } from '../../components/articles-list/articles-list';
 import { SortBy } from '@/app/shared/components/sort-by/sort-by';
 import { Article } from '../../models/article.interface';
 import { environment } from '@/environments/environment';
+import { apiErrorInterceptor } from '@app/core/errors/api-error.interceptor';
 
 const path = `${environment.apiUrl}/api/articles`;
 
@@ -44,7 +45,7 @@ describe('ArticlesFeedPage', () => {
       imports: [ArticlesFeedPage],
       providers: [
         provideRouter([]),
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([apiErrorInterceptor])),
         provideHttpClientTesting(),
       ],
     }).compileComponents();
@@ -121,5 +122,35 @@ describe('ArticlesFeedPage', () => {
     fixture.detectChanges();
 
     expect(component.order()).toBe('asc');
+  });
+
+  it('should display an error and an empty list when loading the articles fails', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}?sort=desc`).flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
+    const articlesList = fixture.debugElement.query(By.css('app-articles-list'));
+    expect((articlesList.componentInstance as ArticlesList).articles()).toEqual([]);
+  });
+
+  it('should recover once the sort order changes again after a failed load', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${path}?sort=desc`).flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
+
+    const sortBy = fixture.debugElement.query(By.css('app-sort-by'))
+      .componentInstance as SortBy;
+    sortBy.toggle();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${path}?sort=asc`);
+    req.flush(articles);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Une erreur est survenue. Veuillez réessayer.');
+    const articlesList = fixture.debugElement.query(By.css('app-articles-list'));
+    expect((articlesList.componentInstance as ArticlesList).articles()).toEqual(articles);
   });
 });

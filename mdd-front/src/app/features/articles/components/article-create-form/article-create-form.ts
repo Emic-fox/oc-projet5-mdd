@@ -5,6 +5,7 @@ import { InputText } from '@shared/components/forms/input-text/input-text';
 import { InputTextarea } from '@shared/components/forms/input-textarea/input-textarea';
 import { InputSelect } from '@shared/components/forms/input-select/input-select';
 import { Topic } from '@/app/features/topics/models/topic.interface';
+import { ErrorsContainer } from '@shared/components/errors-container/errors-container';
 
 export interface ArticleCreateFormData {
   title: string;
@@ -13,7 +14,7 @@ export interface ArticleCreateFormData {
 }
 
 @Component({
-  imports: [Button, FormField, InputText, InputTextarea, InputSelect],
+  imports: [Button, FormField, InputText, InputTextarea, InputSelect, ErrorsContainer],
   selector: 'app-article-create-form',
   template: `
   <form class="flex flex-col gap-4 w-full max-w-md mx-auto" (submit)="onSubmit($event)">
@@ -24,11 +25,14 @@ export interface ArticleCreateFormData {
     <app-input-textarea [formField]="articleForm.content" placeholder="Contenu de l'article" data-testid="content">Contenu</app-input-textarea>
 
     <app-button type="submit" class="self-center" data-testid="create-submit" [disabled]="articleForm().invalid()">Créer</app-button>
+
+    <app-errors-container [message]="globalError()" />
   </form>
   `,
 })
 export class ArticleCreateForm {
   topics = input.required<Topic[]>();
+  globalError = input<string | null>(null);
   submitted = output<ArticleCreateFormData>();
 
   topicOptions = computed(() => this.topics().map((topic) => ({ value: topic.id, label: topic.name })));

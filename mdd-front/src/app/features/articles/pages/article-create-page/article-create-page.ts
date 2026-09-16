@@ -16,11 +16,7 @@ import { AsyncPipe } from '@angular/common';
     <app-back-link class="self-center" to="/articles" label="Retour aux articles" />
     <h1 class="text-2xl font-bold text-center self-center">Créer un nouvel article</h1>
 
-    <app-article-create-form class="col-start-2" [topics]="(topics$ | async) ?? []" (submitted)="onSubmit($event)" />
-
-    @if (error()) {
-      <p class="col-start-2 text-center text-sm text-red-600" data-testid="api-error">{{ error() }}</p>
-    }
+    <app-article-create-form class="col-start-2" [topics]="(topics$ | async) ?? []" [globalError]="error()" (submitted)="onSubmit($event)" />
   </div>
   `,
 })

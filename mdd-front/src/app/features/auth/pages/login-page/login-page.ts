@@ -9,11 +9,7 @@ import { ApiError } from '@app/core/errors/api-error';
   imports: [LoginForm],
   selector: 'app-login-page',
   template: `
-  <app-login-form (submitted)="onLogin($event)" />
-
-  @if (error()) {
-    <p class="mt-4 text-center text-sm text-red-600" data-testid="api-error">{{ error() }}</p>
-  }`,
+  <app-login-form [globalError]="error()" (submitted)="onLogin($event)" />`,
 })
 export class LoginPage {
   private auth = inject(AuthService);

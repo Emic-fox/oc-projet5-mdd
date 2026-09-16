@@ -3,6 +3,7 @@ import { applyWhen, form, FormField, required, email, minLength, pattern, submit
 import { Button } from "@shared/components/button/button";
 import { InputText } from "@shared/components/forms/input-text/input-text";
 import { InputPassword } from "@shared/components/forms/input-password/input-password";
+import { ErrorsContainer } from '@shared/components/errors-container/errors-container';
 
 export interface ProfileFormData {
   username: string;
@@ -19,7 +20,7 @@ export type ProfileFormInitialData = Pick<ProfileFormData, 'username' | 'email'>
  * l'édition du profil (username/email pré-remplis, "Sauvegarder").
  */
 @Component({
-  imports: [Button, FormField, InputText, InputPassword],
+  imports: [Button, FormField, InputText, InputPassword, ErrorsContainer],
   selector: 'app-profile-form',
   template: `
   <form class="flex flex-col items-center gap-4 w-full max-w-sm" (submit)="onSubmit($event)">
@@ -30,6 +31,8 @@ export type ProfileFormInitialData = Pick<ProfileFormData, 'username' | 'email'>
     <app-input-password [formField]="profileForm.password" autocomplete="new-password" data-testid="password" />
 
     <app-button type="submit" data-testid="profile-submit" [disabled]="profileForm().invalid()">{{ submitLabel() }}</app-button>
+
+    <app-errors-container [message]="globalError()" />
   </form>`,
 })
 export class ProfileForm {
@@ -39,6 +42,8 @@ export class ProfileForm {
   submitLabel = input.required<string>();
   /** Le mot de passe est-il obligatoire (inscription) ou facultatif (édition de profil) ? */
   passwordRequired = input(true);
+  /** Erreur de soumission renvoyée par la page (retour API). */
+  globalError = input<string | null>(null);
 
   submitted = output<ProfileFormData>();
 

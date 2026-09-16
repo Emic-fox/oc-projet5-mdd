@@ -5,18 +5,21 @@ import { TopicsList } from '@/app/features/topics/components/topics-list/topics-
 import { Topic } from '@/app/features/topics/models/topic.interface';
 import { TopicsService } from '@/app/features/topics/services/topics.service';
 import { Notifier } from '@app/core/services/notifier.service';
+import { ApiError } from '@app/core/errors/api-error';
+import { ErrorsContainer } from '@shared/components/errors-container/errors-container';
 
 @Component({
-  imports: [ProfileForm, TopicsList],
+  imports: [ProfileForm, TopicsList, ErrorsContainer],
   selector: 'app-profile-page',
   template: `
   <section class="flex flex-col items-center gap-2">
     <h2 class="font-bold text-3xl">Profil utilisateur</h2>
-    <app-profile-form [initialData]="initialData()" [passwordRequired]="false" submitLabel="Sauvegarder" (submitted)="onProfileUpdate($event)" />
+    <app-profile-form [initialData]="initialData()" [passwordRequired]="false" submitLabel="Sauvegarder" [globalError]="error()" (submitted)="onProfileUpdate($event)" />
   </section>
   <hr class="mx-12 my-4" />
   <section class="flex flex-col items-stretch gap-2">
     <h2 class="font-bold text-3xl self-center">Abonnements</h2>
+    <app-errors-container [message]="topicsError()" />
     <app-topics-list [topics]="topics()" (unsubscribe)="onUnsubscribe($event)" />
   </section>
 `,
@@ -32,9 +35,14 @@ export class ProfilePage {
   }));
 
   topics = signal<Topic[]>([]);
+  protected error = signal<string | null>(null);
+  protected topicsError = signal<string | null>(null);
 
   ngOnInit() {
-    this.topicsService.getTopics({ subscribed: true }).subscribe(topics => this.topics.set(topics));
+    this.topicsService.getTopics({ subscribed: true }).subscribe({
+      next: (topics) => this.topics.set(topics),
+      error: (err: ApiError) => this.topicsError.set(err.message),
+    });
   }
 
   onUnsubscribe(id: number) {
@@ -42,15 +50,19 @@ export class ProfilePage {
   }
 
   onProfileUpdate(data: ProfileFormData) {
+    this.error.set(null);
+
     if (this.auth.user()?.username != data.username || this.auth.user()?.email != data.email) {
       this.auth.updateProfile(data.username, data.email).subscribe({
         next: () => this.notifier.success('Profil mis à jour.'),
+        error: (err: ApiError) => this.error.set(err.message),
       });
     }
 
     if (data.password) {
       this.auth.updatePassword(data.password).subscribe({
         next: () => this.notifier.success('Mot de passe mis à jour.'),
+        error: (err: ApiError) => this.error.set(err.message),
       });
     }
   }

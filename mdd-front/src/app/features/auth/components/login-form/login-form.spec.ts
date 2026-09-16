@@ -90,4 +90,17 @@ describe('LoginForm', () => {
     await fixture.whenStable();
     expect(emitted).toEqual([]);
   });
+
+  it('should render the global error when set', () => {
+    fixture.componentRef.setInput('globalError', 'Identifiant ou mot de passe incorrect.');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Identifiant ou mot de passe incorrect.');
+  });
+
+  it('should render nothing when there is no global error', () => {
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="content-error"]'),
+    ).toBeNull();
+  });
 });
