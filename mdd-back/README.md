@@ -88,6 +88,9 @@ l'ensemble de la suite.
 - Consulter le rapport HTML : ouvrir `target/site/jacoco/index.html` dans un navigateur.
 - Formats machine disponibles pour la CI : `target/site/jacoco/jacoco.xml` et `jacoco.csv`.
 
+Le fichier `jacoco.xml` est notamment celui consommé par l'analyse SonarQube
+(voir le [README à la racine du dépôt](../README.md#analyse-de-qualité-de-code-sonarqube)).
+
 ## Gestion des conteneurs
 
 - Le conteneur MariaDB est nommé `mdd-mariadb` et persiste ses données dans un volume Docker nommé (`mdd-mariadb-data`).

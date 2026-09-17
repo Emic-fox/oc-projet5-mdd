@@ -62,8 +62,11 @@ npm run test:coverage
 ```
 
 Le résumé s'affiche dans la console et un rapport détaillé est généré dans
-`coverage/mdd-front/` (`index.html` navigable, `clover.xml`,
+`coverage/mdd-front/` (`index.html` navigable, `lcov.info`,
 `coverage-final.json`). Le dossier `coverage/` est ignoré par Git.
+
+Le fichier `lcov.info` est notamment celui consommé par l'analyse SonarQube
+(voir le [README à la racine du dépôt](../README.md#analyse-de-qualité-de-code-sonarqube)).
 
 ### Tests end-to-end (Playwright)
 
@@ -89,3 +92,7 @@ tests via la fixture `e2e/fixtures/coverage.fixtures.ts` (neutre sur les autres
 navigateurs). Le résumé s'affiche dans la console et les rapports sont générés
 dans `coverage/e2e/` (`index.html` V8, `html-spa/` façon Istanbul, `lcov.info`).
 Le dossier `coverage/` est ignoré par Git.
+
+Comme pour les tests unitaires, `lcov.info` est consommé par l'analyse SonarQube,
+en complément de la couverture unitaire (voir le
+[README à la racine du dépôt](../README.md#analyse-de-qualité-de-code-sonarqube)).

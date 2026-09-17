@@ -43,6 +43,12 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
+# Env
+.env
+
+# SonarQube
+.scannerwork/
+
 # Playwright
 node_modules/
 /test-results/
