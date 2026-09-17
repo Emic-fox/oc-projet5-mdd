@@ -28,7 +28,7 @@ export class TopicCard {
   unsubscribe = output<number>();
 
   topicsService = inject(TopicsService);
-  private notifier = inject(Notifier);
+  private readonly notifier = inject(Notifier);
 
   subscribeButtonLabel = computed<string>(() => {
     if (this.topic().subscribed) {

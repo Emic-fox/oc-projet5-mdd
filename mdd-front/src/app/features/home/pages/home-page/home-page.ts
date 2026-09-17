@@ -19,7 +19,7 @@ import { Button } from "@shared/components/button/button";
   `,
 })
 export class HomePage {
-  private router = inject(Router);
+  private readonly router = inject(Router);
 
   goTo(page: 'login' | 'register') {
     this.router.navigate([`/${page}`]);

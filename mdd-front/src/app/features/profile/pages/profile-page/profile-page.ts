@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ProfileForm, ProfileFormData } from '@shared/components/forms/profile-form/profile-form';
 import { AuthService } from '@app/features/auth/services/auth.service';
 import { TopicsList } from '@/app/features/topics/components/topics-list/topics-list';
@@ -24,19 +24,19 @@ import { ErrorsContainer } from '@shared/components/errors-container/errors-cont
   </section>
 `,
 })
-export class ProfilePage {
-  protected auth = inject(AuthService);
-  private topicsService = inject(TopicsService);
-  private notifier = inject(Notifier);
+export class ProfilePage implements OnInit {
+  protected readonly auth = inject(AuthService);
+  private readonly topicsService = inject(TopicsService);
+  private readonly notifier = inject(Notifier);
 
-  protected initialData = computed(() => ({
+  protected readonly initialData = computed(() => ({
     username: this.auth.user()?.username ?? '',
     email: this.auth.user()?.email ?? '',
   }));
 
-  topics = signal<Topic[]>([]);
-  protected error = signal<string | null>(null);
-  protected topicsError = signal<string | null>(null);
+  readonly topics = signal<Topic[]>([]);
+  protected readonly error = signal<string | null>(null);
+  protected readonly topicsError = signal<string | null>(null);
 
   ngOnInit() {
     this.topicsService.getTopics({ subscribed: true }).subscribe({

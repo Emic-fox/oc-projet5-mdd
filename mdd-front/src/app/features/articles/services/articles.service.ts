@@ -7,9 +7,9 @@ import { CreateArticleRequest } from '../models/create-article-request.interface
 
 @Service()
 export class ArticlesService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  private path = `${environment.apiUrl}/api/articles`;
+  private readonly path = `${environment.apiUrl}/api/articles`;
 
   getArticles(request: GetArticlesRequest = {}) {
       return this.http.get<Article[]>(this.path, { params: { ...request } });

@@ -22,8 +22,8 @@ import { Toast } from '@app/shared/components/toast/toast';
   `,
 })
 export class ToastHost {
-  protected notifier = inject(Notifier);
+  protected readonly notifier = inject(Notifier);
 
-  protected errorToasts = computed(() => this.notifier.toasts().filter((t) => t.type === 'error'));
-  protected successToasts = computed(() => this.notifier.toasts().filter((t) => t.type === 'success'));
+  protected readonly errorToasts = computed(() => this.notifier.toasts().filter((t) => t.type === 'error'));
+  protected readonly successToasts = computed(() => this.notifier.toasts().filter((t) => t.type === 'success'));
 }

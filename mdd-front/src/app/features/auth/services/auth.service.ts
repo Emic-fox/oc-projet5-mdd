@@ -15,16 +15,16 @@ import { MePutPasswordRequest } from '../models/me-put-password-request.interfac
 
 @Service()
 export class AuthService {
-    private http = inject(HttpClient);
-    private tokenStore = inject(TokenStore);
-    private destroyRef = inject(DestroyRef);
-    private router = inject(Router);
+    private readonly http = inject(HttpClient);
+    private readonly tokenStore = inject(TokenStore);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly router = inject(Router);
 
-    private path = `${environment.apiUrl}/api/auth`;
+    private readonly path = `${environment.apiUrl}/api/auth`;
 
     /** Présence d'un token (synchrone) : ne présume rien de la validité de la session côté API. */
     readonly isAuthenticated = computed(() => !!this.tokenStore.token());
-    private currentUser = signal<MeResponse | null>(null);
+    private readonly currentUser = signal<MeResponse | null>(null);
 
     /** Utilisateur authentifié courant (null si déconnecté ou pas encore chargé). */
     readonly user = this.currentUser.asReadonly();

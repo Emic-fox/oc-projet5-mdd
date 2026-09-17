@@ -21,13 +21,13 @@ import { AsyncPipe } from '@angular/common';
   `,
 })
 export class ArticleCreatePage {
-  private topicsService = inject(TopicsService);
-  private articlesService = inject(ArticlesService);
-  private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
+  private readonly topicsService = inject(TopicsService);
+  private readonly articlesService = inject(ArticlesService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected topics$ = this.topicsService.getTopics();
-  protected error = signal<string | null>(null);
+  protected readonly error = signal<string | null>(null);
 
   onSubmit(data: ArticleCreateFormData) {
     this.error.set(null);

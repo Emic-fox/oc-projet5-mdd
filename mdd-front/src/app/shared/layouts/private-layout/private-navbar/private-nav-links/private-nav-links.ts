@@ -23,8 +23,8 @@ export class PrivateNavLinks {
   /** Émis après une navigation (déconnexion incluse) — sert au parent à fermer le drawer mobile. */
   navigate = output<void>();
 
-  private auth = inject(AuthService);
-  private router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected logout(): void {
     this.auth.logout();

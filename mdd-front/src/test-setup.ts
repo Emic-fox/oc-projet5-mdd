@@ -8,7 +8,7 @@ import { beforeEach, vi } from 'vitest';
  * restent testables sans mock explicite.
  */
 class InMemoryStorage implements Storage {
-  private store = new Map<string, string>();
+  private readonly store = new Map<string, string>();
 
   get length(): number {
     return this.store.size;

@@ -7,7 +7,7 @@ import { Service, signal } from '@angular/core';
  */
 @Service()
 export class TokenStore {
-    private _token = signal<string | null>(localStorage.getItem('token'));
+    private readonly _token = signal<string | null>(localStorage.getItem('token'));
 
     readonly token = this._token.asReadonly();
 

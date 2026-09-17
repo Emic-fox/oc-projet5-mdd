@@ -5,9 +5,9 @@ import { Comment } from '../models/comment.interface';
 
 @Service()
 export class CommentsService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  private path = (articleId: number) => `${environment.apiUrl}/api/articles/${articleId}/comments`;
+  private readonly path = (articleId: number) => `${environment.apiUrl}/api/articles/${articleId}/comments`;
 
   getComments(articleId: number) {
       return this.http.get<Comment[]>(this.path(articleId));

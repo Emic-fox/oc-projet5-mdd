@@ -15,5 +15,5 @@ export class Toast {
   toast = input.required<ToastModel>();
   dismiss = output<number>();
 
-  protected colorClass = computed(() => (this.toast().type === 'error' ? 'bg-red-600' : 'bg-green-600'));
+  protected readonly colorClass = computed(() => (this.toast().type === 'error' ? 'bg-red-600' : 'bg-green-600'));
 }

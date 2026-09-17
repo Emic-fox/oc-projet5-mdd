@@ -44,12 +44,12 @@ import { ErrorsContainer } from '@shared/components/errors-container/errors-cont
   `,
 })
 export class ArticleDetailPage {
-  private route = inject(ActivatedRoute);
-  private articlesService = inject(ArticlesService);
-  private commentsService = inject(CommentsService);
-  private destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly articlesService = inject(ArticlesService);
+  private readonly commentsService = inject(CommentsService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private id$ = this.route.paramMap.pipe(map((params) => Number(params.get('id'))));
+  private readonly id$ = this.route.paramMap.pipe(map((params) => Number(params.get('id'))));
 
   error = signal<string | null>(null);
 

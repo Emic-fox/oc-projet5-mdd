@@ -5,7 +5,6 @@ import { ToastHost } from '@app/shared/components/toast-host/toast-host';
 @Component({
   imports: [RouterOutlet, ToastHost],
   selector: 'app-root',
-  styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {

@@ -18,7 +18,7 @@ import { ErrorsContainer } from '@shared/components/errors-container/errors-cont
   />`,
 })
 export class TopicsPage implements OnInit {
-  private topicsService = inject(TopicsService);
+  private readonly topicsService = inject(TopicsService);
 
   topics = signal<Topic[]>([]);
   error = signal<string | null>(null);

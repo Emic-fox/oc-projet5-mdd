@@ -7,9 +7,9 @@ import { Topic } from '../models/topic.interface';
 
 @Service()
 export class TopicsService {
-    private http = inject(HttpClient);
-    
-    private path = `${environment.apiUrl}/api/topics`;
+    private readonly http = inject(HttpClient);
+
+    private readonly path = `${environment.apiUrl}/api/topics`;
 
     getTopics(request: GetTopicsRequest = {}) {
         return this.http.get<Topic[]>(this.path, { params: { ...request } });

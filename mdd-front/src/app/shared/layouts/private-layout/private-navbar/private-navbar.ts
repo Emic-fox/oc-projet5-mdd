@@ -45,7 +45,7 @@ import { PrivateNavAvatar } from './private-nav-avatar/private-nav-avatar';
   </header>`,
 })
 export class PrivateNavbar {
-  protected isMenuOpen = signal(false);
+  protected readonly isMenuOpen = signal(false);
 
   protected toggleMenu(): void {
     this.isMenuOpen.update((v) => !v);

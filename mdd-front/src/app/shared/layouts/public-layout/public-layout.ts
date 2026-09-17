@@ -25,10 +25,10 @@ import { BackLink } from "@shared/components/back-link/back-link";
   </div>`,
 })
 export class PublicLayout {
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  protected title = toSignal(
+  protected readonly title = toSignal(
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       map(() => this.getDeepestChild(this.route).snapshot.title ?? '')

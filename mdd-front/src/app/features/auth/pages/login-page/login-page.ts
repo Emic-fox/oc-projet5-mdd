@@ -12,11 +12,11 @@ import { ApiError } from '@app/core/errors/api-error';
   <app-login-form [globalError]="error()" (submitted)="onLogin($event)" />`,
 })
 export class LoginPage {
-  private auth = inject(AuthService);
-  private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  protected error = signal<string | null>(null);
+  protected readonly error = signal<string | null>(null);
 
   onLogin(credentials: LoginData) {
     this.error.set(null);

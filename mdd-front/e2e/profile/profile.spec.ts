@@ -77,7 +77,6 @@ test.describe('Profil', () => {
     await expect(profilePage.submitButton).toBeEnabled();
 
     await profilePage.submit.click();
-    await page.waitForLoadState('networkidle');
 
     expect(updateCalled).toBe(false);
     expect(passwordCalled).toBe(false);

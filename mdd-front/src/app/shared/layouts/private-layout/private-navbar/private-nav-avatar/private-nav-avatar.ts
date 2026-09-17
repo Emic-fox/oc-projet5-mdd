@@ -17,7 +17,7 @@ import { Router, RouterLink, isActive } from '@angular/router';
 })
 export class PrivateNavAvatar {
   navigate = output<void>();
-  private router = inject(Router);
+  private readonly router = inject(Router);
 
   isProfileActive = isActive('/profile', this.router);
 }

@@ -17,8 +17,8 @@ export class BackLink {
   to = input<string | unknown[]>();
   label = input<string>('Retour');
 
-  private location = inject(Location);
-  private router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
   protected goBack(): void {
     const to = this.to();

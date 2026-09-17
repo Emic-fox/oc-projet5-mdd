@@ -11,7 +11,7 @@ import { Component, computed, input } from '@angular/core';
 export class Card {
   clickable = input(false);
 
-  protected classes = computed(() => {
+  protected readonly classes = computed(() => {
     const base = 'bg-neutral-100 rounded-md py-2 px-4 flex flex-col gap-1 h-full';
     return this.clickable() ? `${base} cursor-pointer transition-colors hover:bg-neutral-200` : base;
   });

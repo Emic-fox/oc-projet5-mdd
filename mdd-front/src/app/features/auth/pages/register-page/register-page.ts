@@ -12,11 +12,11 @@ import { ApiError } from '@app/core/errors/api-error';
   <app-profile-form submitLabel="S'inscrire" [globalError]="error()" (submitted)="onRegister($event)" />`,
 })
 export class RegisterPage {
-  private auth = inject(AuthService);
-  private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  protected error = signal<string | null>(null);
+  protected readonly error = signal<string | null>(null);
 
   onRegister(data: ProfileFormData) {
     this.error.set(null);
