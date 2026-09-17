@@ -43,27 +43,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationEntryPoint authenticationEntryPoint)
-            throws Exception {
-        return http
-                // Stateless
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationEntryPoint authenticationEntryPoint) {
+        try {
+            return http
+                    // Stateless
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                    .csrf(csrf -> csrf.disable())
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Endpoints publics vs authentifiés
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated())
+                    // Endpoints publics vs authentifiés
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                            .anyRequest().authenticated())
 
-                // Gestion de l'authentification
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+                    // Gestion de l'authentification
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                    .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
 
-                .httpBasic(basic -> basic.disable())
-                .formLogin(form -> form.disable())
-                .logout(logout -> logout.disable())
-                .build();
+                    .httpBasic(basic -> basic.disable())
+                    .formLogin(form -> form.disable())
+                    .logout(logout -> logout.disable())
+                    .build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Échec de la construction de la chaîne de filtres de sécurité", e);
+        }
     }
 
     /** Politique CORS : autorise le front Angular à appeler l'API (méthodes et en-têtes standard). */
@@ -94,7 +97,11 @@ public class SecurityConfig {
 
     /** Gestionnaire d'authentification */
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
+        try {
+            return config.getAuthenticationManager();
+        } catch (Exception e) {
+            throw new IllegalStateException("Échec de la récupération de l'AuthenticationManager", e);
+        }
     }
 }

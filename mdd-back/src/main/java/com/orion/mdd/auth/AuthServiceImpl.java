@@ -1,5 +1,7 @@
 package com.orion.mdd.auth;
 
+import java.util.Objects;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,7 +44,7 @@ class AuthServiceImpl implements AuthService {
             throw new UsernameAlreadyUsedException();
         }
 
-        User user = userService.create(new User(email, username, passwordEncoder.encode(rawPassword)));
+        User user = userService.create(new User(email, username, encodePassword(rawPassword)));
 
         return jwtService.generateToken(user.getUsername());
     }
@@ -53,7 +55,9 @@ class AuthServiceImpl implements AuthService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(emailOrUsername, rawPassword));
 
-            UserDetails principal = (UserDetails) authentication.getPrincipal();
+            if (!(authentication.getPrincipal() instanceof UserDetails principal)) {
+                throw new InvalidCredentialsException();
+            }
             return jwtService.generateToken(principal.getUsername());
         } catch (AuthenticationException _) {
             throw new InvalidCredentialsException();
@@ -91,8 +95,12 @@ class AuthServiceImpl implements AuthService {
     @Transactional
     public void updatePassword(Long userId, String rawPassword) {
         User user = userService.loadById(userId);
-        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setPassword(encodePassword(rawPassword));
         userService.create(user);
+    }
+
+    private String encodePassword(String rawPassword) {
+        return Objects.requireNonNull(passwordEncoder.encode(rawPassword), "L'encodage du mot de passe a échoué");
     }
 
 }
