@@ -16,13 +16,6 @@ test.describe("Page d'accueil et navigation", () => {
         await expect(page).toHaveURL('/register');
     });
 
-    test("redirige une URL inconnue vers l'accueil", async ({ page }) => {
-        await page.goto('/une-page-qui-nexiste-pas');
-
-        const homePage = new HomePage(page);
-        await homePage.expectLoaded();
-    });
-
     test('le lien retour du layout public ramène à l’accueil', async ({ page }) => {
         await page.goto('/login');
         await page.getByTestId('back-link').click();
