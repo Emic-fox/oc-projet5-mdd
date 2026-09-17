@@ -42,7 +42,7 @@ describe('TopicsService', () => {
 
     const req = httpMock.expectOne(url);
     expect(req.request.method).toBe('GET');
-    expect(req.request.params.keys().length).toBe(0);
+    expect(req.request.params.keys()).toHaveLength(0);
     req.flush(topics);
   });
 

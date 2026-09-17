@@ -50,7 +50,7 @@ describe('ArticlesList', () => {
     fixture.detectChanges();
 
     const cards = fixture.debugElement.queryAll(By.css('app-article-card'));
-    expect(cards.length).toBe(2);
+    expect(cards).toHaveLength(2);
     expect((cards[0].componentInstance as ArticleCard).article()).toEqual(articles[0]);
     expect((cards[1].componentInstance as ArticleCard).article()).toEqual(articles[1]);
   });
@@ -60,6 +60,6 @@ describe('ArticlesList', () => {
     fixture.detectChanges();
 
     const cards = fixture.debugElement.queryAll(By.css('app-article-card'));
-    expect(cards.length).toBe(0);
+    expect(cards).toHaveLength(0);
   });
 });

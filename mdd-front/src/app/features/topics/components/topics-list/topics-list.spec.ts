@@ -33,7 +33,7 @@ describe('TopicsList', () => {
     fixture.detectChanges();
 
     const cards = fixture.debugElement.queryAll(By.css('app-topic-card'));
-    expect(cards.length).toBe(2);
+    expect(cards).toHaveLength(2);
     expect(cards[0].componentInstance.topic()).toEqual(topics[0]);
     expect(cards[1].componentInstance.topic()).toEqual(topics[1]);
   });
@@ -64,7 +64,7 @@ describe('TopicsList', () => {
     fixture.componentRef.setInput('topics', []);
     fixture.detectChanges();
 
-    expect(fixture.debugElement.queryAll(By.css('app-topic-card')).length).toBe(0);
+    expect(fixture.debugElement.queryAll(By.css('app-topic-card'))).toHaveLength(0);
   });
 
   it('should forward the subscribe event emitted by a topic card', () => {

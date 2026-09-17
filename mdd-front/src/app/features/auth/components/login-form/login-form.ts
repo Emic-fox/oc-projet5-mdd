@@ -1,5 +1,5 @@
 import { Component, input, output, signal } from '@angular/core';
-import { form, FormField, required, email, submit } from '@angular/forms/signals';
+import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Button } from "@shared/components/button/button";
 import { InputText } from "@shared/components/forms/input-text/input-text";
 import { InputPassword } from "@shared/components/forms/input-password/input-password";

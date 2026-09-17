@@ -83,7 +83,7 @@ describe('ProfilePage', () => {
     fixture.detectChanges();
 
     const errors = fixture.nativeElement.querySelectorAll('[data-testid="content-error"]');
-    expect(errors.length).toBe(2);
+    expect(errors).toHaveLength(2);
     expect(errors[0].textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
     expect(errors[1].textContent).toContain('Une erreur est survenue. Veuillez réessayer.');
   });

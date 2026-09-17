@@ -1,4 +1,4 @@
-import { Component, computed, inject, output } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { Router, RouterLink, isActive } from '@angular/router';
 
 @Component({

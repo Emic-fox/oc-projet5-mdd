@@ -15,7 +15,7 @@ describe('ToastHost', () => {
     fixture.detectChanges();
 
     const toasts = fixture.nativeElement.querySelectorAll('[data-testid="toast"]');
-    expect(toasts.length).toBe(0);
+    expect(toasts).toHaveLength(0);
   });
 
   it('renders a toast for each notifier entry', () => {
@@ -27,7 +27,7 @@ describe('ToastHost', () => {
     fixture.detectChanges();
 
     const toasts = fixture.nativeElement.querySelectorAll('[data-testid="toast"]');
-    expect(toasts.length).toBe(2);
+    expect(toasts).toHaveLength(2);
     expect(fixture.nativeElement.textContent).toContain('Oops');
     expect(fixture.nativeElement.textContent).toContain('Saved');
   });
@@ -40,7 +40,7 @@ describe('ToastHost', () => {
     fixture.nativeElement.querySelector('[data-testid="toast"] button').click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelectorAll('[data-testid="toast"]').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="toast"]')).toHaveLength(0);
   });
 
   it('keeps the live-region containers in the DOM even without toasts', () => {

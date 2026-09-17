@@ -64,7 +64,7 @@ export class ProfileForm {
       (password) => {
         required(password, { message: 'Le mot de passe est obligatoire' });
         minLength(password, 8, { message: 'Le mot de passe doit contenir au moins 8 caractères' });
-        pattern(password, /[0-9]/, { message: 'Le mot de passe doit contenir au moins 1 chiffre' });
+        pattern(password, /\d/, { message: 'Le mot de passe doit contenir au moins 1 chiffre' });
         pattern(password, /[a-z]/, { message: 'Le mot de passe doit contenir au moins 1 minuscule' });
         pattern(password, /[A-Z]/, { message: 'Le mot de passe doit contenir au moins 1 majuscule' });
         pattern(password, /[^A-Za-z0-9]/, { message: 'Le mot de passe doit contenir au moins 1 caractère spécial' });

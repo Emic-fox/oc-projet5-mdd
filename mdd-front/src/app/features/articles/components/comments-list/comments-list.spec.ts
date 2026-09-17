@@ -38,7 +38,7 @@ describe('CommentsList', () => {
 
   it('should render one entry per comment with its author and content', () => {
     const items = fixture.nativeElement.querySelectorAll('[data-testid="comment"]');
-    expect(items.length).toBe(2);
+    expect(items).toHaveLength(2);
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('JohnDoe');

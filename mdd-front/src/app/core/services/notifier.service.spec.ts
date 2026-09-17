@@ -38,7 +38,7 @@ describe('Notifier', () => {
 
   it('auto-dismisses a toast after 5s', () => {
     notifier.error('Oops');
-    expect(notifier.toasts().length).toBe(1);
+    expect(notifier.toasts()).toHaveLength(1);
 
     vi.advanceTimersByTime(5000);
 
