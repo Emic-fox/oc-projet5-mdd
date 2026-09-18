@@ -15,8 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.orion.mdd.users.User;
-import com.orion.mdd.users.UserNotFoundException;
 import com.orion.mdd.users.UserService;
+import com.orion.mdd.users.exceptions.UserNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit")

@@ -2,6 +2,8 @@ package com.orion.mdd.users;
 
 import org.springframework.stereotype.Service;
 
+import com.orion.mdd.users.exceptions.UserNotFoundException;
+
 @Service
 class UserServiceImpl implements UserService {
     private final UserRepository userRepository;

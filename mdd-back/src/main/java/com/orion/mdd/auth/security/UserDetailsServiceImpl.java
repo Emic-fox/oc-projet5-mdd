@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.orion.mdd.users.User;
-import com.orion.mdd.users.UserNotFoundException;
 import com.orion.mdd.users.UserService;
+import com.orion.mdd.users.exceptions.UserNotFoundException;
 
 /**
  * Pont entre Spring Security et le domaine {@code users} : charge un utilisateur

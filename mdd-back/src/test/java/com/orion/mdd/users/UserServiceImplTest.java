@@ -16,6 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.orion.mdd.users.exceptions.UserNotFoundException;
+
 @ExtendWith(MockitoExtension.class)
 @Tag("unit")
 @Tag("service")
