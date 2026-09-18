@@ -33,6 +33,7 @@ import com.orion.mdd.auth.dto.MeResponse;
 import com.orion.mdd.auth.dto.MeResponseMapper;
 import com.orion.mdd.auth.dto.RegisterRequest;
 import com.orion.mdd.auth.dto.UpdateMeRequest;
+import com.orion.mdd.auth.dto.UpdateMeResult;
 import com.orion.mdd.auth.dto.UpdatePasswordRequest;
 import com.orion.mdd.auth.exceptions.EmailAlreadyUsedException;
 import com.orion.mdd.auth.exceptions.InvalidCredentialsException;

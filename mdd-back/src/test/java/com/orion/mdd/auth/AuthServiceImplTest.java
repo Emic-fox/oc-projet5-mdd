@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.orion.mdd.auth.dto.UpdateMeResult;
 import com.orion.mdd.auth.exceptions.EmailAlreadyUsedException;
 import com.orion.mdd.auth.exceptions.InvalidCredentialsException;
 import com.orion.mdd.auth.exceptions.UsernameAlreadyUsedException;

@@ -18,6 +18,7 @@ import com.orion.mdd.auth.dto.MeResponseMapper;
 import com.orion.mdd.auth.dto.MeUpdateResponse;
 import com.orion.mdd.auth.dto.RegisterRequest;
 import com.orion.mdd.auth.dto.UpdateMeRequest;
+import com.orion.mdd.auth.dto.UpdateMeResult;
 import com.orion.mdd.auth.dto.UpdatePasswordRequest;
 import com.orion.mdd.auth.security.UserDetailsImpl;
 

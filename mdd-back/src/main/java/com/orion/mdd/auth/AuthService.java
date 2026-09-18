@@ -1,5 +1,6 @@
 package com.orion.mdd.auth;
 
+import com.orion.mdd.auth.dto.UpdateMeResult;
 import com.orion.mdd.users.User;
 
 public interface AuthService {

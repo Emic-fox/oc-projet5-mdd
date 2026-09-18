@@ -1,4 +1,4 @@
-package com.orion.mdd.auth;
+package com.orion.mdd.auth.dto;
 
 import com.orion.mdd.users.User;
 
