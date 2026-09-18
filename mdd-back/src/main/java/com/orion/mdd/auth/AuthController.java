@@ -30,6 +30,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+/**
+ * Contrôleur REST exposant les opérations d'authentification et de gestion
+ * du profil de l'utilisateur courant (inscription, connexion, consultation
+ * et mise à jour du profil, changement de mot de passe).
+ */
 @Tag(name = "Authentification", description = "Opérations d'authentification des utilisateurs")
 @RestController
 @RequestMapping(value="/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -37,6 +42,10 @@ public class AuthController {
     private final AuthService authService;
     private final MeResponseMapper meResponseMapper;
 
+    /**
+     * @param authService      service applicatif portant la logique d'authentification
+     * @param meResponseMapper mapper convertissant un {@code User} en {@link MeResponse}
+     */
     public AuthController(AuthService authService, MeResponseMapper meResponseMapper) {
         this.authService = authService;
         this.meResponseMapper = meResponseMapper;
@@ -48,6 +57,12 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Échec de l'authentification, données invalides", content = @Content),
             @ApiResponse(responseCode = "401", description = "Échec de l'authentification, informations d'identification invalides", content = @Content)
     })
+    /**
+     * Authentifie un utilisateur à partir de son email/username et de son mot de passe.
+     *
+     * @param loginRequest identifiants de connexion (login et mot de passe)
+     * @return un {@link AuthResponse} contenant le jeton JWT généré
+     */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         String token = this.authService.login(loginRequest.login(), loginRequest.password());
@@ -61,6 +76,12 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Échec de l'inscription, données invalides", content = @Content),
             @ApiResponse(responseCode = "409", description = "Échec de l'inscription, username ou email déjà utilisé", content = @Content)
     })
+    /**
+     * Inscrit un nouvel utilisateur puis l'authentifie automatiquement.
+     *
+     * @param registerRequest informations d'inscription (email, username, mot de passe)
+     * @return un {@link AuthResponse} contenant le jeton JWT généré, avec le statut 201
+     */
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         String token = this.authService.register(registerRequest.email(), registerRequest.username(), registerRequest.password());
@@ -73,6 +94,12 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content)
     })
     @SecurityRequirement(name = "bearerAuth")
+    /**
+     * Récupère les informations du profil de l'utilisateur actuellement authentifié.
+     *
+     * @param authenticatedUser utilisateur authentifié, résolu à partir du jeton JWT
+     * @return le profil de l'utilisateur courant
+     */
     @GetMapping("/me")
     public ResponseEntity<MeResponse> currentUser(@AuthenticationPrincipal UserDetailsImpl authenticatedUser) {
         return ResponseEntity.ok(this.meResponseMapper.toMeResponse(this.authService.me(authenticatedUser.getId())));
@@ -86,6 +113,14 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Échec de la mise à jour, username ou email déjà utilisé", content = @Content)
     })
     @SecurityRequirement(name = "bearerAuth")
+    /**
+     * Met à jour l'email et le nom d'utilisateur du profil de l'utilisateur courant.
+     * Renvoie un nouveau jeton JWT, l'ancien devenant invalide si le username a changé.
+     *
+     * @param authenticatedUser utilisateur authentifié, résolu à partir du jeton JWT
+     * @param request           nouvel email et nouveau username
+     * @return le profil mis à jour accompagné du nouveau jeton JWT
+     */
     @PutMapping("/me")
     public ResponseEntity<MeUpdateResponse> updateCurrentUser(@AuthenticationPrincipal UserDetailsImpl authenticatedUser,
             @Valid @RequestBody UpdateMeRequest request) {
@@ -101,6 +136,13 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content)
     })
     @SecurityRequirement(name = "bearerAuth")
+    /**
+     * Change le mot de passe de l'utilisateur actuellement authentifié.
+     *
+     * @param authenticatedUser utilisateur authentifié, résolu à partir du jeton JWT
+     * @param request           nouveau mot de passe
+     * @return une réponse vide avec le statut 204
+     */
     @PutMapping("/me/password")
     public ResponseEntity<Void> updateCurrentPassword(@AuthenticationPrincipal UserDetailsImpl authenticatedUser,
             @Valid @RequestBody UpdatePasswordRequest request) {

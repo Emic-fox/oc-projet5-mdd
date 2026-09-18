@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * DTO de requête pour la création d'un article.
+ */
 public record CreateArticleRequest(
     @Schema(description = "Identifiant du thème de l'article", example = "1")
     @JsonProperty("topic_id")

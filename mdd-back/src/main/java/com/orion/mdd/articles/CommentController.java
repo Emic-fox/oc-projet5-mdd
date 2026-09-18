@@ -27,6 +27,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+/**
+ * Contrôleur REST exposant les opérations sur les commentaires des articles.
+ */
 @Tag(name = "Commentaires", description = "Opérations sur les commentaires des articles")
 @RestController
 @RequestMapping(value = "/api/articles/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -34,11 +37,23 @@ public class CommentController {
     private final CommentService commentService;
     private final CommentResponseMapper commentResponseMapper;
 
+    /**
+     * Construit le contrôleur avec ses dépendances injectées par Spring.
+     *
+     * @param commentService service métier de gestion des commentaires
+     * @param commentResponseMapper mapper de conversion des entités {@link Comment} en DTO de réponse
+     */
     public CommentController(CommentService commentService, CommentResponseMapper commentResponseMapper) {
         this.commentService = commentService;
         this.commentResponseMapper = commentResponseMapper;
     }
 
+    /**
+     * Récupère la liste des commentaires d'un article, triés par date de création.
+     *
+     * @param id identifiant de l'article
+     * @return 200 avec la liste des commentaires de l'article
+     */
     @Operation(summary = "Liste des commentaires d'un article", description = "Liste des commentaires d'un article")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Liste des commentaires"),
@@ -56,6 +71,14 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Ajoute un commentaire à l'article donné, avec l'utilisateur connecté comme auteur.
+     *
+     * @param id identifiant de l'article commenté
+     * @param request données de création du commentaire (contenu)
+     * @param authenticatedUser utilisateur actuellement authentifié, utilisé comme auteur
+     * @return 201 avec le commentaire créé
+     */
     @Operation(summary = "Ajout d'un commentaire à un article", description = "Ajoute un commentaire à l'article donné, avec l'utilisateur connecté comme auteur")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Commentaire créé"),

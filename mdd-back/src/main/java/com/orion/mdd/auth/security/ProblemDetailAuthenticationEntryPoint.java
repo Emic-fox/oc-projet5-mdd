@@ -19,14 +19,17 @@ import tools.jackson.databind.ObjectMapper;
  */
 class ProblemDetailAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    /** Message renvoyé dans le corps {@link ProblemDetail} lorsque l'authentification manque ou est invalide. */
     static final String DETAIL = "Authentification requise";
 
     private final ObjectMapper objectMapper;
 
+    /** @param objectMapper mapper utilisé pour sérialiser le corps {@link ProblemDetail} de la réponse */
     ProblemDetailAuthenticationEntryPoint(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
+    /** Écrit une réponse 401 au format {@link ProblemDetail} (RFC 7807) dans le flux de sortie. */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException {

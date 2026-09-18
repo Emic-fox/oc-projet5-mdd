@@ -26,6 +26,7 @@ import tools.jackson.databind.ObjectMapper;
 @Configuration
 public class SecurityConfig {
 
+    /** Endpoints accessibles sans authentification (inscription, connexion, documentation Swagger). */
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/register", "/api/auth/login",
             // Swagger UI
@@ -38,10 +39,19 @@ public class SecurityConfig {
     @Value("${orion.mdd.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
+    /** @param jwtAuthenticationFilter filtre chargé d'authentifier les requêtes via le jeton JWT */
     SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+    /**
+     * Définit la chaîne de filtres de sécurité : API stateless, CORS, endpoints publics vs
+     * authentifiés, filtre JWT et gestion des erreurs d'authentification.
+     *
+     * @param http                     configuration HTTP Spring Security à personnaliser
+     * @param authenticationEntryPoint point d'entrée déclenché quand l'authentification manque
+     * @return la chaîne de filtres de sécurité construite
+     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationEntryPoint authenticationEntryPoint) {
         try {

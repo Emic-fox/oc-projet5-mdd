@@ -8,8 +8,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
+/**
+ * Configuration de la documentation OpenAPI/Swagger de l'API.
+ */
 @Configuration
 public class OpenApiConfig {
+    /**
+     * Décrit l'API (titre, description, version) et déclare le schéma de sécurité
+     * "bearerAuth" (JWT) utilisé par les endpoints protégés.
+     *
+     * @return la configuration OpenAPI de l'application
+     */
     @Bean
     public OpenAPI mddOpenAPI() {
         return new OpenAPI()

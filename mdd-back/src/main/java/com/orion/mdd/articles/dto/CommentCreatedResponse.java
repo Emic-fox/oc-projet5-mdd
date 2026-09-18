@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * DTO de réponse renvoyé après la création d'un commentaire, incluant une référence
+ * allégée à l'article commenté.
+ */
 public record CommentCreatedResponse(
     @Schema(description = "Identifiant du commentaire", example = "1")
     Long id,
@@ -18,6 +22,7 @@ public record CommentCreatedResponse(
     @Schema(description = "Date de création du commentaire", example = "2025-01-01T12:00:00")
     LocalDateTime createdAt
 ) {
+    /** Référence allégée à l'article commenté. */
     @Schema(name = "CommentArticleRef")
     public record ArticleRef(
         @Schema(description = "Identifiant de l'article", example = "1")

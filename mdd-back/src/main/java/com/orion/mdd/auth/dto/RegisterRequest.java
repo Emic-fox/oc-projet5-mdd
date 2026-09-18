@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/** Corps de la requête d'inscription : email, nom d'utilisateur et mot de passe. */
 public record RegisterRequest(
         @Schema(description = "Adresse e-mail de l'utilisateur", example = "john.doe@example.com")
         @NotBlank @Email String email,

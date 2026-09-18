@@ -19,6 +19,12 @@ import com.orion.mdd.auth.security.JwtService;
 import com.orion.mdd.users.User;
 import com.orion.mdd.users.UserService;
 
+/**
+ * Implémentation par défaut de {@link AuthService}, s'appuyant sur
+ * {@link UserService} pour la persistance des utilisateurs, {@link PasswordEncoder}
+ * pour le hachage des mots de passe, {@link JwtService} pour l'émission des jetons
+ * et {@link AuthenticationManager} pour la vérification des identifiants.
+ */
 @Service
 class AuthServiceImpl implements AuthService {
 
@@ -27,6 +33,12 @@ class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * @param userService            service de persistance des utilisateurs
+     * @param passwordEncoder        encodeur utilisé pour hacher les mots de passe
+     * @param jwtService             service d'émission/validation des jetons JWT
+     * @param authenticationManager  gestionnaire d'authentification Spring Security
+     */
     AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService,
             AuthenticationManager authenticationManager) {
         this.userService = userService;
@@ -35,6 +47,7 @@ class AuthServiceImpl implements AuthService {
         this.authenticationManager = authenticationManager;
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public String register(String email, String username, String rawPassword) {
@@ -50,6 +63,7 @@ class AuthServiceImpl implements AuthService {
         return jwtService.generateToken(user.getUsername());
     }
 
+    /** {@inheritDoc} */
     @Override
     public String login(String emailOrUsername, String rawPassword) {
         try {
@@ -65,12 +79,14 @@ class AuthServiceImpl implements AuthService {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public User me(Long userId) {
         return userService.loadById(userId);
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public UpdateMeResult updateMe(Long userId, String email, String username) {
@@ -92,6 +108,7 @@ class AuthServiceImpl implements AuthService {
         return new UpdateMeResult(updated, jwtService.generateToken(updated.getUsername()));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public void updatePassword(Long userId, String rawPassword) {
@@ -100,6 +117,7 @@ class AuthServiceImpl implements AuthService {
         userService.create(user);
     }
 
+    /** Encode un mot de passe en clair avec {@link #passwordEncoder} ; échoue si l'encodage renvoie {@code null}. */
     private String encodePassword(String rawPassword) {
         return Objects.requireNonNull(passwordEncoder.encode(rawPassword), "L'encodage du mot de passe a échoué");
     }

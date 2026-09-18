@@ -10,10 +10,12 @@ package com.orion.mdd.core.exceptions;
  */
 public abstract class ApiException extends RuntimeException {
 
+    /** Crée l'exception sans message : le {@code reason} de {@code @ResponseStatus} sera utilisé. */
     protected ApiException() {
         super();
     }
 
+    /** @param message message qui surcharge le {@code reason} de {@code @ResponseStatus} */
     protected ApiException(String message) {
         super(message);
     }

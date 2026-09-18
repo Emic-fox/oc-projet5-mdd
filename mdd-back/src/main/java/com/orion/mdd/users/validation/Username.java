@@ -27,9 +27,12 @@ import jakarta.validation.constraints.Size;
         message = "must contain only letters, digits, dots, underscores or hyphens")
 public @interface Username {
 
+    /** Message d'erreur renvoyé lorsque la contrainte n'est pas respectée. */
     String message() default "invalid username";
 
+    /** Groupes de validation Bean Validation associés à cette contrainte. */
     Class<?>[] groups() default {};
 
+    /** Charge utile associée à cette contrainte, pour les clients de l'API de validation. */
     Class<? extends Payload>[] payload() default {};
 }

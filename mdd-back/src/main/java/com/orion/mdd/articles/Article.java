@@ -25,6 +25,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Entité JPA représentant un article publié sur un {@link Topic} par un {@link User}.
+ */
 @Entity
 @Table(name = "articles")
 @EntityListeners(AuditingEntityListener.class)
@@ -48,16 +51,19 @@ public class Article {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    /** Thème auquel l'article est rattaché. */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
+    /** Utilisateur auteur de l'article. */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    /** Date de création de l'article, renseignée automatiquement par l'audit JPA. */
     @CreatedDate
     @Column(updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;

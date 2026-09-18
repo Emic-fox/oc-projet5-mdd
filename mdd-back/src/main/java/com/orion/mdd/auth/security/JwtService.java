@@ -20,6 +20,7 @@ public class JwtService {
     private final SecretKey secretKey;
     private final long expirationMs;
 
+    /** @param properties paramètres JWT (clé de signature Base64 et durée de validité) */
     public JwtService(JwtProperties properties) {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.secret()));
         this.expirationMs = properties.expirationMs();

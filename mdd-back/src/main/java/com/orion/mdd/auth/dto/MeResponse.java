@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/** Profil public de l'utilisateur, tel que renvoyé par l'API. */
 public record MeResponse(
         @Schema(description = "Identifiant de l'utilisateur", example = "1")
         Long id,

@@ -10,6 +10,7 @@ import com.orion.mdd.topics.exceptions.AlreadySubscribedException;
 import com.orion.mdd.topics.exceptions.NotSubscribedException;
 import com.orion.mdd.topics.exceptions.TopicNotFoundException;
 
+/** Implémentation par défaut de {@link TopicService}. */
 @Service
 class TopicServiceImpl implements TopicService {
     private final TopicRepository topicRepository;
@@ -18,6 +19,7 @@ class TopicServiceImpl implements TopicService {
         this.topicRepository = topicRepository;
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public List<TopicWithSubscription> getAll(Long currentUserId, boolean onlySubscribed) {
@@ -38,6 +40,7 @@ class TopicServiceImpl implements TopicService {
             .toList();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public Topic getById(Long id) {
@@ -45,6 +48,7 @@ class TopicServiceImpl implements TopicService {
             .orElseThrow(TopicNotFoundException::new);
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public void subscribe(Long topicId, Long userId) {
@@ -58,6 +62,7 @@ class TopicServiceImpl implements TopicService {
         topicRepository.insertSubscription(topicId, userId);
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public void unsubscribe(Long topicId, Long userId) {

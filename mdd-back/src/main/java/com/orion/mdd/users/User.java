@@ -20,6 +20,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Entité JPA représentant un utilisateur de l'application.
+ */
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
@@ -46,6 +49,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    /** Date de création de l'utilisateur, valorisée automatiquement à l'insertion. */
     @CreatedDate
     @Column(updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;

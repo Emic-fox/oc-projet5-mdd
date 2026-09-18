@@ -24,6 +24,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Entité JPA représentant un commentaire posté par un {@link User} sur un {@link Article}.
+ */
 @Entity
 @Table(name = "comments")
 @EntityListeners(AuditingEntityListener.class)
@@ -43,16 +46,19 @@ public class Comment {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    /** Article auquel le commentaire est rattaché. */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "article_id", nullable = false)
     private Article article;
 
+    /** Utilisateur auteur du commentaire. */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    /** Date de création du commentaire, renseignée automatiquement par l'audit JPA. */
     @CreatedDate
     @Column(updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;

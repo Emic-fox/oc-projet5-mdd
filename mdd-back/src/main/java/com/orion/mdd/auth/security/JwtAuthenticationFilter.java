@@ -25,17 +25,28 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    /** Nom de l'en-tête HTTP porteur du jeton. */
     private static final String HEADER = "Authorization";
+    /** Préfixe attendu devant le jeton dans l'en-tête {@link #HEADER}. */
     private static final String PREFIX = "Bearer ";
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * @param jwtService          service de validation/extraction des jetons JWT
+     * @param userDetailsService  service de chargement de l'utilisateur authentifié
+     */
     JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Filtre exécuté une fois par requête : extrait et valide le jeton JWT puis,
+     * s'il est présent et valide, peuple le {@code SecurityContext} avant de
+     * poursuivre la chaîne de filtres.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
@@ -59,6 +70,7 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
+    /** Extrait le jeton du header {@code Authorization}, ou {@code null} s'il est absent/mal formé. */
     private String resolveToken(HttpServletRequest request) {
         String header = request.getHeader(HEADER);
         if (header != null && header.startsWith(PREFIX)) {

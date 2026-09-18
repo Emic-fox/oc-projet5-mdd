@@ -18,10 +18,12 @@ class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserService userService;
 
+    /** @param userService service de persistance des utilisateurs */
     UserDetailsServiceImpl(UserService userService) {
         this.userService = userService;
     }
 
+    /** Charge l'utilisateur par email ou username ; lève {@link UsernameNotFoundException} si introuvable. */
     @Override
     public UserDetails loadUserByUsername(String emailOrUsername) throws UsernameNotFoundException {
         try {

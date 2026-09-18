@@ -28,6 +28,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+/**
+ * Contrôleur REST exposant les opérations sur les articles des thèmes suivis par l'utilisateur connecté.
+ */
 @Tag(name = "Articles", description = "Opérations sur les articles des thèmes suivis par l'utilisateur connecté")
 @RestController
 @RequestMapping(value = "/api/articles", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -35,11 +38,24 @@ public class ArticleController {
     private final ArticleService articleService;
     private final ArticleResponseMapper articleResponseMapper;
 
+    /**
+     * Construit le contrôleur avec ses dépendances injectées par Spring.
+     *
+     * @param articleService service métier de gestion des articles
+     * @param articleResponseMapper mapper de conversion des entités {@link Article} en DTO de réponse
+     */
     public ArticleController(ArticleService articleService, ArticleResponseMapper articleResponseMapper) {
         this.articleService = articleService;
         this.articleResponseMapper = articleResponseMapper;
     }
 
+    /**
+     * Récupère le fil des articles des thèmes suivis par l'utilisateur connecté, triés par date de création.
+     *
+     * @param request paramètres de la requête (ordre de tri)
+     * @param authenticatedUser utilisateur actuellement authentifié
+     * @return 200 avec la liste des articles du fil de l'utilisateur
+     */
     @Operation(summary = "Liste des articles", description = "Liste des articles des thèmes suivis par l'utilisateur")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Liste des articles"),
@@ -59,6 +75,12 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Récupère le détail d'un article par son identifiant.
+     *
+     * @param id identifiant de l'article
+     * @return 200 avec le détail de l'article demandé
+     */
     @Operation(summary = "Détail d'un article", description = "Détail d'un article")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Détail de l'article"),
@@ -73,6 +95,13 @@ public class ArticleController {
         return ResponseEntity.ok(articleResponseMapper.toArticleResponse(article));
     }
 
+    /**
+     * Crée un article sur le thème donné, avec l'utilisateur connecté comme auteur.
+     *
+     * @param request données de création de l'article (thème, titre, contenu)
+     * @param authenticatedUser utilisateur actuellement authentifié, utilisé comme auteur
+     * @return 201 avec l'article créé
+     */
     @Operation(summary = "Création d'un article", description = "Crée un article sur le thème donné, avec l'utilisateur connecté comme auteur")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Article créé"),

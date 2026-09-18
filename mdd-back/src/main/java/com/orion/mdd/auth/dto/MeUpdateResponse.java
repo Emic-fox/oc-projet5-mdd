@@ -2,6 +2,7 @@ package com.orion.mdd.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/** Réponse renvoyée après la mise à jour du profil : profil à jour et nouveau jeton JWT. */
 public record MeUpdateResponse(
         @Schema(description = "Profil mis à jour")
         MeResponse user,

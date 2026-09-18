@@ -29,13 +29,21 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+/**
+ * Contrôleur REST exposant les opérations sur les thèmes (topics) et leur souscription
+ * par l'utilisateur actuellement authentifié.
+ */
 @Tag(name = "Thèmes", description = "Opérations contenant les thèmes et leur souscription par l'utilisateur connecté")
 @RestController
-@RequestMapping(value="/api/topics", produces = MediaType.APPLICATION_JSON_VALUE) 
+@RequestMapping(value="/api/topics", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TopicController {
     private final TopicService topicService;
     private final TopicResponseMapper topicResponseMapper;
 
+    /**
+     * @param topicService service métier des thèmes
+     * @param topicResponseMapper mapper vers les DTO de réponse exposés par l'API
+     */
     public TopicController(TopicService topicService, TopicResponseMapper topicResponseMapper) {
         this.topicService = topicService;
         this.topicResponseMapper = topicResponseMapper;
@@ -46,6 +54,14 @@ public class TopicController {
         @ApiResponse(responseCode = "200", description = "Liste des thèmes"),
         @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content)
     })
+    /**
+     * Liste les thèmes disponibles, éventuellement filtrés sur les seuls thèmes auxquels
+     * l'utilisateur connecté est abonné.
+     *
+     * @param request paramètres de filtrage de la requête (souscription uniquement ou non)
+     * @param authenticatedUser utilisateur actuellement authentifié
+     * @return la liste des thèmes, avec pour chacun l'état de souscription de l'utilisateur
+     */
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("")
     public ResponseEntity<List<TopicResponse>> getTopics(
@@ -67,6 +83,13 @@ public class TopicController {
         @ApiResponse(responseCode = "404", description = "Thème non trouvé", content = @Content),
         @ApiResponse(responseCode = "409", description = "Utilisateur déjà abonné", content = @Content)
     })
+    /**
+     * Abonne l'utilisateur connecté au thème donné.
+     *
+     * @param id identifiant du thème auquel s'abonner
+     * @param authenticatedUser utilisateur actuellement authentifié
+     * @return la référence de l'abonnement créé (thème et utilisateur)
+     */
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/{id}/subscription")
     public ResponseEntity<SubscriptionResponse> subscribe(
@@ -89,6 +112,13 @@ public class TopicController {
         @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content),
         @ApiResponse(responseCode = "404", description = "Thème non trouvé ou utilisateur non abonné", content = @Content)
     })
+    /**
+     * Désabonne l'utilisateur connecté du thème donné.
+     *
+     * @param id identifiant du thème dont se désabonner
+     * @param authenticatedUser utilisateur actuellement authentifié
+     * @return une réponse 204 sans contenu
+     */
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}/subscription")
     public ResponseEntity<Void> unsubscribe(

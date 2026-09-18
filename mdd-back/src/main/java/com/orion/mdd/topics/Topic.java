@@ -24,6 +24,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Entité JPA représentant un thème (topic) auquel les utilisateurs peuvent s'abonner.
+ */
 @Entity
 @Table(name = "topics")
 @EntityListeners(AuditingEntityListener.class)
@@ -34,6 +37,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class Topic {
+    /** Identifiant technique, utilisé seul pour l'égalité/hashCode. */
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -47,6 +51,7 @@ public class Topic {
     @Column(nullable = false)
     private String description;
 
+    /** Utilisateurs abonnés à ce thème, via la table de jointure {@code subscriptions}. */
     @ManyToMany
     @JoinTable(
         name = "subscriptions",

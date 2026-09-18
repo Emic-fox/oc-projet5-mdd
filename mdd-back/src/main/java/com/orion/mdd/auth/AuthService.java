@@ -3,6 +3,11 @@ package com.orion.mdd.auth;
 import com.orion.mdd.auth.dto.UpdateMeResult;
 import com.orion.mdd.users.User;
 
+/**
+ * Service applicatif portant la logique d'authentification et de gestion
+ * du profil (inscription, connexion, consultation et mise à jour du profil,
+ * changement de mot de passe).
+ */
 public interface AuthService {
 
     /** Crée un compte et renvoie un jeton d'authentification. */
