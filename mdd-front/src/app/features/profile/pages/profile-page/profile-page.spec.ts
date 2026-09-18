@@ -142,15 +142,19 @@ describe('ProfilePage', () => {
       expect(notifierSpy).toHaveBeenCalledWith('Mot de passe mis à jour.');
     });
 
-    it('should update the profile and the password together', () => {
+    it('should update the profile and the password together, sequentially', () => {
       component.onProfileUpdate({ username: 'JaneDoe', email: 'jane@doe.dev', password: 'NewPassword1!' });
 
+      // Le mot de passe ne doit être envoyé qu'après réception du nouveau token,
+      // pour ne jamais utiliser un token invalidé par le changement de username.
       const updateReq = httpMock.expectOne(meUrl);
       expect(updateReq.request.method).toBe('PUT');
-      const passwordReq = httpMock.expectOne(passwordUrl);
-      expect(passwordReq.request.method).toBe('PUT');
+      httpMock.expectNone(passwordUrl);
 
       updateReq.flush({ user: { id: 1, username: 'JaneDoe', email: 'jane@doe.dev' }, token: 'new-jwt' });
+
+      const passwordReq = httpMock.expectOne(passwordUrl);
+      expect(passwordReq.request.method).toBe('PUT');
       passwordReq.flush({});
     });
 

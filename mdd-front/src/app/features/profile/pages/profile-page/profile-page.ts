@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { concat, EMPTY, tap } from 'rxjs';
 import { ProfileForm, ProfileFormData } from '@shared/components/forms/profile-form/profile-form';
 import { AuthService } from '@app/features/auth/services/auth.service';
 import { TopicsList } from '@/app/features/topics/components/topics-list/topics-list';
@@ -52,18 +53,23 @@ export class ProfilePage implements OnInit {
   onProfileUpdate(data: ProfileFormData) {
     this.error.set(null);
 
-    if (this.auth.user()?.username != data.username || this.auth.user()?.email != data.email) {
-      this.auth.updateProfile(data.username, data.email).subscribe({
-        next: () => this.notifier.success('Profil mis à jour.'),
-        error: (err: ApiError) => this.error.set(err.message),
-      });
-    }
+    const identityChanged = this.auth.user()?.username != data.username || this.auth.user()?.email != data.email;
 
-    if (data.password) {
-      this.auth.updatePassword(data.password).subscribe({
-        next: () => this.notifier.success('Mot de passe mis à jour.'),
-        error: (err: ApiError) => this.error.set(err.message),
-      });
-    }
+    const updateProfile$ = identityChanged
+      ? this.auth.updateProfile(data.username, data.email).pipe(
+          tap(() => this.notifier.success('Profil mis à jour.'))
+        )
+      : EMPTY;
+
+    const updatePassword$ = data.password
+      ? this.auth.updatePassword(data.password).pipe(
+          tap(() => this.notifier.success('Mot de passe mis à jour.'))
+        )
+      : EMPTY;
+
+    // updatePassword$ après complétion de updateProfile$, pour tenir compte du nouveau token
+    concat(updateProfile$, updatePassword$).subscribe({
+      error: (err: ApiError) => this.error.set(err.message),
+    });
   }
 }
